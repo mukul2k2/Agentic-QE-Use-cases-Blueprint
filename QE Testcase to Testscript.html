@@ -1,0 +1,2139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Script Generation Workflow</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --text-color: #f8fafc;
+            --primary: #3b82f6;
+            --secondary: #8b5cf6;
+            --accent: #10b981;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+
+            /* Syntax Highlighting Colors */
+            --sh-key: #60a5fa;
+            --sh-string: #a78bfa;
+            --sh-number: #f472b6;
+            --sh-boolean: #fbbf24;
+            --sh-punctuation: #cbd5e1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: block;
+            background-image:
+                radial-gradient(circle at 15% 10%, rgba(59, 130, 246, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.15) 0%, transparent 40%);
+        }
+
+        /* Modern Website Additional CSS */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-brand {
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-brand svg {
+            color: var(--accent);
+        }
+
+        .hero {
+            padding: 80px 50px 40px 50px;
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero p.subtitle {
+            font-size: 1.2rem;
+            color: #94a3b8;
+            max-width: 800px;
+            margin: 0 auto 50px auto;
+            line-height: 1.6;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin-top: 50px;
+            text-align: left;
+        }
+
+        .feature-card {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 30px;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(96, 165, 250, 0.3);
+            box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.2);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .feature-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #f8fafc;
+        }
+
+        .feature-desc {
+            font-size: 0.95rem;
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+
+        .app-section {
+            max-width: 1600px;
+            margin: 0 auto 100px auto;
+            padding: 0 20px;
+        }
+
+        .app-window {
+            height: 800px;
+            background: #0f172a;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .app-toolbar {
+            height: 60px;
+            background: #1e293b;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            justify-content: space-between;
+        }
+
+        .mac-dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .mac-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .mac-dot.red {
+            background: #ef4444;
+        }
+
+        .mac-dot.yellow {
+            background: #f59e0b;
+        }
+
+        .mac-dot.green {
+            background: #10b981;
+        }
+
+
+        .header {
+            text-align: center;
+            padding: 20px 20px 10px 20px;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+
+        /* Story Selector Controls */
+        .story-selector-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(15, 23, 42, 0.7);
+            padding: 6px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .story-label {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .story-select {
+            background: #1e293b;
+            color: #f8fafc;
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            border-radius: 8px;
+            padding: 5px 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .story-select:hover,
+        .story-select:focus {
+            border-color: #60a5fa;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+        }
+
+        .story-ticket-pill {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Agent Switcher Arrow Controls */
+        .agent-nav-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 3px 6px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-agent-nav {
+            background: #1e293b;
+            color: #f8fafc;
+            border: 1px solid rgba(96, 165, 250, 0.25);
+            border-radius: 6px;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 0;
+        }
+
+        .btn-agent-nav:hover:not(:disabled) {
+            background: #2563eb;
+            color: white;
+            border-color: #60a5fa;
+            transform: translateY(-1px);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-agent-nav:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-agent-nav:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            border-color: rgba(255, 255, 255, 0.05);
+            background: rgba(30, 41, 59, 0.4);
+            color: #64748b;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .agent-nav-indicator {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #60a5fa;
+            min-width: 20px;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+            flex-shrink: 0;
+        }
+
+        .btn-simulate {
+            background: linear-gradient(135deg, var(--accent), #059669);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+            transition: all 0.2s;
+        }
+
+        .btn-simulate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-simulate:disabled {
+            background: #475569;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .main-container {
+            height: calc(100% - 60px);
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            padding: 0 20px 20px 20px;
+            gap: 20px;
+        }
+
+        /* Interactive Canvas */
+        .pipeline-wrapper {
+            flex: 2;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            border-radius: 16px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--card-border);
+            position: relative;
+            cursor: grab;
+
+            /* Animated Data Grid */
+            background-size: 40px 40px;
+            background-image:
+                linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        }
+
+        .pipeline-wrapper:active {
+            cursor: grabbing;
+        }
+
+        .pipeline-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 15px;
+            width: max-content;
+            padding: 40px;
+            pointer-events: auto;
+            transform-origin: left center;
+        }
+
+        .agent-node {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 20px;
+            width: 270px;
+            height: 220px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            user-select: none;
+        }
+
+        .agent-node.active,
+        .agent-node:hover {
+            transform: translateY(-8px);
+            border-color: rgba(96, 165, 250, 0.8);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2),
+                0 0 15px rgba(59, 130, 246, 0.4);
+            background: rgba(40, 55, 75, 0.9);
+        }
+
+        .agent-node.simulating {
+            border-color: var(--accent);
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.5);
+            background: rgba(40, 55, 75, 0.95);
+        }
+
+        .agent-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            gap: 12px;
+        }
+
+        .agent-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
+        }
+
+        .agent-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .agent-tool {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .agent-tool::before {
+            content: '⚙️';
+            font-size: 0.8rem;
+        }
+
+        /* Tool Classification Badge */
+        .type-badge {
+            display: inline-block;
+            font-size: 0.65rem;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            width: fit-content;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .type-api {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .type-llm {
+            background: rgba(244, 114, 182, 0.15);
+            color: #f472b6;
+            border: 1px solid rgba(244, 114, 182, 0.3);
+        }
+
+        .pipeline-status {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #cbd5e1;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .simulating .pipeline-status {
+            opacity: 1;
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .sim-spinner {
+            width: 10px;
+            height: 10px;
+            border: 2px solid transparent;
+            border-top-color: #34d399;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .connector {
+            width: 40px;
+            height: 2px;
+            background-color: #334155;
+            position: relative;
+        }
+
+        .connector-flow {
+            position: absolute;
+            top: -3px;
+            left: 0;
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent);
+            opacity: 0;
+        }
+
+        .agent-node.active+.connector .connector-flow,
+        .agent-node:hover+.connector .connector-flow,
+        .agent-node.simulating+.connector .connector-flow {
+            opacity: 1;
+            animation: flowAnimation 1s infinite linear;
+        }
+
+        @keyframes flowAnimation {
+            0% {
+                left: 0;
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                left: 100%;
+                opacity: 0;
+            }
+        }
+
+        .loop-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: linear-gradient(45deg, #f59e0b, #ef4444);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+        }
+
+        /* Details Panel */
+        .details-panel {
+            flex: 1;
+            min-width: 480px;
+            max-width: 500px;
+            background: var(--panel-bg);
+            border-radius: 16px;
+            border: 1px solid var(--card-border);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            box-shadow: -5px 0 25px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .details-empty {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-size: 1.1rem;
+            text-align: center;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .details-empty svg {
+            width: 48px;
+            height: 48px;
+            opacity: 0.5;
+        }
+
+        .details-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .details-content.visible {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .panel-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .panel-tool {
+            color: var(--primary);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .detail-section {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .detail-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #cbd5e1;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .copy-btn.copied {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .detail-box {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            border-left: 3px solid var(--secondary);
+        }
+
+        /* Syntax Highlighted Code Box */
+        .detail-box.code {
+            font-family: 'Consolas', 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            background: #0f172a;
+            border-left-color: var(--accent);
+            overflow-x: auto;
+        }
+
+        .json-key {
+            color: var(--sh-key);
+        }
+
+        .json-string {
+            color: var(--sh-string);
+        }
+
+        .json-number {
+            color: var(--sh-number);
+        }
+
+        .json-boolean {
+            color: var(--sh-boolean);
+        }
+
+        .json-punctuation {
+            color: var(--sh-punctuation);
+        }
+
+        .instructions-list {
+            padding-left: 20px;
+            margin-top: 5px;
+        }
+
+        .instructions-list li {
+            margin-bottom: 8px;
+        }
+
+        /* Generic Diagram Wrapper */
+        .diagram-wrapper {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px dashed var(--accent);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .interactive-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            width: 100%;
+        }
+
+        .system-node {
+            background: #1e293b;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .node-agent {
+            border-top: 3px solid #3b82f6;
+        }
+
+        .node-qa {
+            border-top: 3px solid #f59e0b;
+        }
+
+        .node-jira {
+            border-top: 3px solid #2684FF;
+        }
+
+        .node-xray {
+            border-top: 3px solid #ff5630;
+        }
+
+        .node-orchestrator {
+            border-top: 3px solid #8b5cf6;
+        }
+
+        .flow-arrows {
+            position: relative;
+            width: 120px;
+            height: 50px;
+            z-index: 1;
+        }
+
+        .flow-top,
+        .flow-bottom {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .flow-top {
+            top: 10px;
+        }
+
+        .flow-bottom {
+            bottom: 10px;
+        }
+
+        .flow-top.right::after,
+        .flow-bottom.right::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: -4px;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            border-left: 5px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .flow-top.left::after,
+        .flow-bottom.left::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: -4px;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            border-right: 5px solid rgba(255, 255, 255, 0.4);
+        }
+
+        /* Animated JSON Packets */
+        .packet {
+            position: absolute;
+            top: -12px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1e293b;
+            border-radius: 4px;
+            border: 1px solid;
+            box-shadow: 0 0 10px;
+        }
+
+        .packet-primary {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+
+        .packet-success {
+            border-color: #10b981;
+            color: #10b981;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+
+        .packet-danger {
+            border-color: #ef4444;
+            color: #ef4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+
+        .packet-warning {
+            border-color: #f59e0b;
+            color: #f59e0b;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+        }
+
+        .packet svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .particle-right {
+            animation: moveRightPacket 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .particle-left {
+            animation: moveLeftPacket 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .particle-down {
+            animation: moveDownPacket 1.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .label-top {
+            position: absolute;
+            top: -15px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.65rem;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        .label-bottom {
+            position: absolute;
+            bottom: -18px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.65rem;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        @keyframes moveRightPacket {
+            0% {
+                left: 0;
+                opacity: 0;
+                transform: scale(0.5);
+            }
+
+            10% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            90% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            100% {
+                left: 90%;
+                opacity: 0;
+                transform: scale(0.5);
+            }
+        }
+
+        @keyframes moveLeftPacket {
+            0% {
+                right: 0;
+                opacity: 0;
+                transform: scale(0.5);
+            }
+
+            10% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            90% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            100% {
+                right: 90%;
+                opacity: 0;
+                transform: scale(0.5);
+            }
+        }
+
+        @keyframes moveDownPacket {
+            0% {
+                top: -10px;
+                opacity: 0;
+                transform: scale(0.5);
+            }
+
+            10% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            90% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            100% {
+                top: 30px;
+                opacity: 0;
+                transform: scale(0.5);
+            }
+        }
+
+        .explanation-text {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            text-align: center;
+            margin-top: 30px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 6px;
+            width: 100%;
+            border-left: 3px solid var(--accent);
+        }
+
+        .app-window:-webkit-full-screen {
+            border-radius: 0;
+            border: none;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .app-window:fullscreen {
+            border-radius: 0;
+            border: none;
+            width: 100vw;
+            height: 100vh;
+        }
+
+
+        @media (max-width: 900px) {
+            .agent-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .connector.flowing .connector-flow {
+            width: 100%;
+            transition: width 1s linear;
+        }
+
+        .connector.filled .connector-flow {
+            width: 100%;
+            transition: none;
+        }
+
+        .connector.flowing::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border-radius: 50%;
+            transform: translateY(-50%);
+            box-shadow: 0 0 15px #fff, 0 0 30px var(--accent);
+            animation: particle-flow 0.35s linear infinite;
+            z-index: 5;
+        }
+
+        @keyframes particle-flow {
+            0% {
+                left: 0;
+                opacity: 0;
+                transform: translateY(-50%) scale(0.5);
+            }
+
+            15% {
+                opacity: 1;
+                transform: translateY(-50%) scale(1.2);
+            }
+
+            85% {
+                opacity: 1;
+                transform: translateY(-50%) scale(1.2);
+            }
+
+            100% {
+                left: calc(100% - 8px);
+                opacity: 0;
+                transform: translateY(-50%) scale(0.5);
+            }
+        }
+
+        /* Light Mode Overrides */
+        body.light-mode {
+            --bg-color: #f1f5f9;
+            --panel-bg: #ffffff;
+            --text-color: #0f172a;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-border: rgba(0, 0, 0, 0.1);
+
+            /* Syntax Highlighting */
+            --sh-key: #2563eb;
+            --sh-string: #7c3aed;
+            --sh-number: #db2777;
+            --sh-boolean: #d97706;
+            --sh-punctuation: #475569;
+        }
+
+        body.light-mode .navbar {
+            background: rgba(255, 255, 255, 0.8);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-mode .navbar-brand {
+            color: #0f172a;
+        }
+
+        body.light-mode .navbar a {
+            color: #475569 !important;
+        }
+
+        body.light-mode .hero h1 {
+            color: #0f172a;
+        }
+
+        body.light-mode .hero p.subtitle {
+            color: #475569;
+        }
+
+        body.light-mode .feature-card {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        body.light-mode .feature-card:hover {
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-mode .feature-title {
+            color: #0f172a;
+        }
+
+        body.light-mode .feature-desc {
+            color: #475569;
+        }
+
+        body.light-mode .app-window {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        }
+
+        body.light-mode .app-toolbar {
+            background: #e2e8f0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-mode .toolbar-title {
+            color: #475569;
+        }
+
+        body.light-mode .btn-simulate {
+            background: #ffffff;
+            color: #0f172a;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-mode .btn-simulate:hover {
+            background: #f1f5f9;
+        }
+
+        body.light-mode .pipeline-container {
+            background-image:
+                linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+        }
+
+        body.light-mode .agent-node {
+            background: #ffffff;
+        }
+
+        body.light-mode .agent-title {
+            color: #0f172a;
+        }
+
+        body.light-mode .agent-node p {
+            color: #475569 !important;
+        }
+
+        body.light-mode .connector {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-mode .connector.flowing::after {
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        body.light-mode .details-panel {
+            background: #ffffff;
+            border-left: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-mode .details-empty {
+            color: #64748b;
+        }
+
+        body.light-mode .panel-title {
+            color: #0f172a;
+        }
+
+        body.light-mode .detail-box {
+            background: #f8fafc;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-mode .detail-label {
+            color: #475569;
+        }
+
+        body.light-mode .instructions-list li {
+            color: #475569;
+        }
+
+        body.light-mode .interactive-diagram {
+            background: #f1f5f9;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-mode .system-node {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #0f172a;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-mode .explanation-text {
+            color: #475569;
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+
+        body.light-mode .agent-info h4 {
+            color: #0f172a;
+        }
+
+        body.light-mode .sub-agents span {
+            color: #475569;
+        }
+
+        body.light-mode .sub-agents {
+            border-left-color: rgba(0, 0, 0, 0.1);
+        }
+
+        /* Toggle Button Styles */
+        .theme-toggle {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            background: var(--panel-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1000;
+            color: var(--text-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        body.light-mode .theme-toggle {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+
+
+
+
+</head>
+
+
+<body>
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle Light/Dark Mode">
+        <svg id="moonIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            style="display: none;">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+        <svg id="sunIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+    </button>
+
+
+    <!-- Modern Navbar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" />
+            </svg>
+            QE Studio
+        </div>
+        <div style="display: flex; gap: 20px;">
+            <a href="#demo" style="color: #cbd5e1; text-decoration: none; font-size: 0.9rem; font-weight: 600;">View
+                Simulation</a>
+
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <h1>Testcase to Testscript</h1>
+        <p class="subtitle">
+            A multi-agent AI pipeline that securely retrieves test cases from Xray, intelligently generates
+            production-ready Playwright automation scripts using a POM framework, and automatically commits them to a
+            new GitHub branch.
+        </p>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                    </svg>
+                </div>
+                <h3 class="feature-title">Automated Scripting</h3>
+                <p class="feature-desc">Eliminates manual coding by automatically converting Xray test cases into fully
+                    functional Playwright POM scripts.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon" style="color: #60a5fa; background: rgba(59, 130, 246, 0.1);">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                </div>
+                <h3 class="feature-title">Framework Compliant</h3>
+                <p class="feature-desc">Strictly adheres to existing framework rules, locators, and utilities for
+                    zero-syntax-error generation.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon" style="color: #a78bfa; background: rgba(167, 139, 250, 0.1);">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                        <line x1="8" y1="21" x2="16" y2="21" />
+                        <line x1="12" y1="17" x2="12" y2="21" />
+                    </svg>
+                </div>
+                <h3 class="feature-title">Seamless CI/CD</h3>
+                <p class="feature-desc">Automatically creates branches and commits code directly to GitHub, ready for
+                    pull requests.</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Embedded App Area -->
+    <section class="app-section" id="demo">
+        <div class="app-window">
+            <div class="app-toolbar">
+                <div class="mac-dots">
+                    <div class="mac-dot red"></div>
+                    <div class="mac-dot yellow"></div>
+                    <div class="mac-dot green"></div>
+                </div>
+
+                <!-- Story Persona & Scenario Selector -->
+                <div class="story-selector-container">
+                    <div class="story-label">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                        User Story:
+                    </div>
+                    <select class="story-select" id="storySelect" title="Select a Demo User Story">
+                        <option value="default" selected>Default Template</option>
+                        <option value="banking">🏦 Banking: Funds Transfer & Limit Check (BANK-101)</option>
+                        <option value="healthcare">🏥 Healthcare: Doctor Appointment Booking (CARE-202)</option>
+                    </select>
+                    <span class="story-ticket-pill" id="ticketPill">Default</span>
+                </div>
+
+                <!-- Agent Switcher Arrow Controls (Switch between agents before or after simulation) -->
+                <div class="agent-nav-container" title="Switch between agents (before or after simulation)">
+                    <button class="btn-agent-nav" id="btnPrevAgent" title="Previous Agent" aria-label="Previous Agent"
+                        disabled>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+                    <span class="agent-nav-indicator" id="agentNavIndicator">01</span>
+                    <button class="btn-agent-nav" id="btnNextAgent" title="Next Agent" aria-label="Next Agent">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
+                </div>
+                <div class="controls" style="margin: 0; display: flex; gap: 10px;">
+                    <button class="btn-simulate" id="btnFullscreen"
+                        style="background: rgba(255,255,255,0.1); box-shadow: none; padding: 6px 12px; font-size: 0.8rem; margin: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3">
+                            </path>
+                        </svg>
+                        Fullscreen
+                    </button>
+                    <button class="btn-simulate" id="btnSimulate"
+                        style="padding: 6px 12px; font-size: 0.8rem; margin: 0;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        Simulate Execution
+                    </button>
+                </div>
+            </div>
+            <div class="main-container">
+                <!-- Interactive Draggable Pipeline Area -->
+                <div class="pipeline-wrapper" id="pipelineWrapper">
+                    <div class="pipeline-container" id="pipeline">
+
+                        <!-- Agent 1 -->
+                        <div class="agent-node" data-agent="1">
+                            <div class="agent-header">
+                                <div class="agent-icon">01</div>
+                                <div class="agent-title">Xray Jira Fetcher</div>
+                            </div>
+                            <div class="type-badge type-api">🔌 API Integration</div>
+                            <div class="agent-tool">Xray Jira Test Fetcher</div>
+                            <p style="font-size: 0.85rem; color: var(--text-tertiary) !important; flex: 1;">Retrieves
+                                raw Xray test cases from Jira.</p>
+                            <div class="pipeline-status">
+                                <div class="sim-spinner"></div> Processing
+                            </div>
+                        </div>
+                        <div class="connector">
+                            <div class="connector-flow"></div>
+                        </div>
+
+                        <!-- Agent 2 -->
+                        <div class="agent-node" data-agent="2">
+                            <div class="agent-header">
+                                <div class="agent-icon" style="background: linear-gradient(135deg, #8b5cf6, #ec4899);">
+                                    02</div>
+                                <div class="agent-title">Playwright Generator</div>
+                            </div>
+                            <div class="agent-tool" style="visibility: hidden;">No Tool</div>
+                            <p style="font-size: 0.85rem; color: var(--text-tertiary) !important; flex: 1;">Generates
+                                POM scripts from test cases.</p>
+                            <div class="pipeline-status">
+                                <div class="sim-spinner"></div> Processing
+                            </div>
+                        </div>
+                        <div class="connector">
+                            <div class="connector-flow"></div>
+                        </div>
+
+                        <!-- Agent 3 -->
+                        <div class="agent-node" data-agent="3">
+                            <div class="agent-header">
+                                <div class="agent-icon" style="background: linear-gradient(135deg, #0ea5e9, #10b981);">
+                                    03</div>
+                                <div class="agent-title">GitHub Committer</div>
+                            </div>
+                            <div class="type-badge type-api">🔌 API Integration</div>
+                            <div class="agent-tool">QE Github committer Golden Tool</div>
+                            <p style="font-size: 0.85rem; color: var(--text-tertiary) !important; flex: 1;">Commits
+                                scripts to a new GitHub branch.</p>
+                            <div class="pipeline-status">
+                                <div class="sim-spinner"></div> Processing
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Details Panel -->
+                <div class="details-panel" id="detailsPanel">
+                    <div class="details-empty" id="emptyState">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122">
+                            </path>
+                        </svg>
+                        Hover over an agent node<br>to view its working animation and details.
+                    </div>
+
+                    <div class="details-content" id="detailsContent">
+                        <div class="panel-header">
+                            <h2 class="panel-title">
+                                <span id="pIcon" class="agent-icon"
+                                    style="width: 30px; height: 30px; font-size: 0.9rem;">01</span>
+                                <span id="pTitle">Agent Title</span>
+                            </h2>
+                            <div class="panel-tool">⚙️ <span id="pTool">Tool Name</span></div>
+                        </div>
+
+                        <!-- Dynamic Working Animation Container -->
+                        <div class="diagram-wrapper" id="pDiagramWrapper">
+                            <div class="detail-label" id="pDiagramTitle"
+                                style="width: 100%; text-align: left; margin-bottom: 15px;">🔄 Working Process</div>
+                            <div class="interactive-diagram" id="pDiagramContent">
+                                <!-- Filled by JS -->
+                            </div>
+                            <div class="explanation-text" id="pDiagramExplanation">
+                                <!-- Filled by JS -->
+                            </div>
+                        </div>
+
+                        <div class="detail-section">
+                            <div class="detail-label">
+                                <span>📥 Inputs</span>
+                                <button class="copy-btn" onclick="copyCode('pInputRaw', this)">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                    </svg> Copy JSON
+                                </button>
+                            </div>
+                            <!-- Visible highlighted code -->
+                            <div class="detail-box code" id="pInputFormatted"></div>
+                            <!-- Hidden raw code for copying -->
+                            <div id="pInputRaw" style="display:none;"></div>
+                        </div>
+
+                        <div class="detail-section">
+                            <div class="detail-label">📋 Instructions</div>
+                            <div class="detail-box" id="pInstructions">
+                                <ul class="instructions-list" id="pInstructionsList">
+                                    <!-- Instructions injected via JS -->
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="detail-section">
+                            <div class="detail-label">
+                                <span>📤 Expected Output</span>
+                                <button class="copy-btn" onclick="copyCode('pOutputRaw', this)">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                    </svg> Copy JSON
+                                </button>
+                            </div>
+                            <!-- Visible highlighted code -->
+                            <div class="detail-box code" id="pOutputFormatted"></div>
+                            <!-- Hidden raw code for copying -->
+                            <div id="pOutputRaw" style="display:none;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                // SVGs for Logos and Packets
+                const svgJira = `<svg viewBox="0 0 24 24" width="24" height="24"><path fill="#2684FF" d="M11.53 12.37l-5.6 5.6-5.6-5.6a1 1 0 0 1 0-1.42l5.6-5.6a1 1 0 0 1 1.42 0l5.6 5.6a1 1 0 0 1 0 1.42z"/><path fill="#2684FF" d="M19.12 12.37l-5.6 5.6-5.6-5.6a1 1 0 0 1 0-1.42l5.6-5.6a1 1 0 0 1 1.42 0l5.6 5.6a1 1 0 0 1 0 1.42z"/><path fill="#0052CC" d="M23.67 11.66l-5.6 5.6a1 1 0 0 1-1.42 0l-5.6-5.6a1 1 0 0 1 0-1.42l5.6-5.6a1 1 0 0 1 1.42 0l5.6 5.6a1 1 0 0 1 0 1.42z"/></svg>`;
+                const svgXray = `<svg viewBox="0 0 24 24" width="24" height="24" stroke="#ff5630" stroke-width="3" fill="none"><path d="M18 6L6 18M6 6l12 12"/></svg>`;
+                const svgAgent = `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><path d="M8 16h.01"/><path d="M16 16h.01"/></svg>`;
+                const svgJson = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><text x="8" y="17" font-size="8" font-family="monospace" stroke="none" fill="currentColor">{}</text></svg>`;
+                const svgOrchestrator = `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#8b5cf6" stroke-width="2"><rect x="2" y="2" width="20" height="6" rx="2"/><rect x="2" y="16" width="20" height="6" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><polyline points="8 12 12 16 16 12"/></svg>`;
+
+                // HTML templates for various animations
+                const htmlJiraGet = `
+            <div class="system-node node-agent">${svgAgent} Extractor</div>
+            <div class="flow-arrows">
+                <div class="label-top" style="color: #3b82f6;">GET /issue/{id}</div>
+                <div class="flow-top right"><div class="packet packet-primary particle-right">${svgJson}</div></div>
+                <div class="flow-bottom left"><div class="packet packet-success particle-left">${svgJson}</div></div>
+                <div class="label-bottom" style="color: #10b981;">Returns JSON</div>
+            </div>
+            <div class="system-node node-jira">${svgJira} Jira API Server</div>
+        `;
+
+                const htmlSelfHealingLoop = `
+            <div style="display:flex; flex-direction:column; align-items:center; width: 100%; position: relative;">
+                
+                <div class="system-node node-orchestrator" style="margin-bottom: 25px; z-index:2; width: 200px; color:#a78bfa;">
+                    ${svgOrchestrator} Orchestrator Tool
+                </div>
+                
+                <!-- Connector lines down -->
+                <div style="position: absolute; top: 40px; left: 50%; transform: translateX(-50%); width: 210px; height: 35px; border-top: 2px solid rgba(255,255,255,0.2); border-left: 2px solid rgba(255,255,255,0.2); border-right: 2px solid rgba(255,255,255,0.2); z-index: 1;">
+                    <!-- Orchestrator data packets flowing down -->
+                    <div class="packet packet-primary particle-down" style="left: -12px;">${svgJson}</div>
+                    <div class="packet packet-primary particle-down" style="right: -12px; animation-delay: 0.5s;">${svgJson}</div>
+                </div>
+                
+                <div style="display:flex; align-items:center; justify-content: center; gap: 30px; width: 100%; z-index:2;">
+                    <div class="system-node node-agent" style="color:#3b82f6; width: 120px;">${svgAgent} Gen Agent</div>
+                    <div class="flow-arrows" style="width: 90px;">
+                        <div class="label-top" style="color: #3b82f6;">Submits</div>
+                        <div class="flow-top right"><div class="packet packet-primary particle-right">${svgJson}</div></div>
+                        <div class="flow-bottom left"><div class="packet packet-danger particle-left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div></div>
+                        <div class="label-bottom" style="color: #ef4444;">Feedback</div>
+                    </div>
+                    <div class="system-node node-qa" style="color:#f59e0b; width: 120px;">${svgAgent} QA Reviewer</div>
+                </div>
+            </div>
+        `;
+
+                const htmlJiraPost = `
+            <div class="system-node node-agent">${svgAgent} Creator Agent</div>
+            <div class="flow-arrows">
+                <div class="label-top" style="color: #f59e0b;">POST /issue</div>
+                <div class="flow-top right"><div class="packet packet-warning particle-right">${svgJson}</div></div>
+                <div class="flow-bottom right"><div class="packet packet-primary particle-right" style="animation-delay: 1s;">${svgJson}</div></div>
+                <div class="label-bottom" style="color: #8b5cf6;">POST /issueLink</div>
+            </div>
+            <div class="system-node node-jira">${svgJira} Jira API Server</div>
+        `;
+
+                const htmlXraySync = `
+            <div class="system-node node-agent">${svgAgent} Xray Agent</div>
+            <div class="flow-arrows">
+                <div class="label-top" style="color: #10b981;">POST /import</div>
+                <div class="flow-top right"><div class="packet packet-success particle-right">${svgJson}</div></div>
+                <div class="flow-bottom left"><div class="packet packet-primary particle-left" style="color:#3b82f6;border-color:#3b82f6;">${svgJson}</div></div>
+                <div class="label-bottom" style="color: #3b82f6;">IDs & Logs</div>
+            </div>
+            <div class="system-node node-xray">${svgXray} Xray Test Mgmt</div>
+        `;
+
+                // Base Agent Configurations - Base instructions remain identical across all user stories
+                const baseAgents = {
+                    "1": {
+                        title: "Xray Jira Test Case Retrieval",
+                        tool: "Xray Jira Test Fetcher",
+                        color: "linear-gradient(135deg, #3b82f6, #8b5cf6)",
+                        diagramTitle: "🌐 Xray Data Extraction",
+                        diagramHtml: htmlJiraGet,
+                        instructions: [
+                            "Validate all provided inputs.",
+                            "Call the XrayJiraFetcherTool with task_ids.",
+                            "Return the exact JSON string output generated by the tool.",
+                            "Do not summarize or alter the JSON output."
+                        ]
+                    },
+                    "2": {
+                        title: "QE Test Script Generation Clone",
+                        tool: "",
+                        color: "linear-gradient(135deg, #8b5cf6, #ec4899)",
+                        diagramTitle: "🤖 Code Generation Engine",
+                        diagramHtml: `<div class="system-node node-agent">${svgAgent} Script Generator</div>`,
+                        instructions: [
+                            "Follow Page Object Model strictly. Reuse existing page methods.",
+                            "Read framework knowledge base for structure and naming conventions.",
+                            "Use Locators KB for mapping UI elements.",
+                            "Use established logging and assertion utilities.",
+                            "Code must execute with zero syntax errors.",
+                            "Return one object per generated file."
+                        ]
+                    },
+                    "3": {
+                        title: "QE Testscripts GitHub Commit Agent",
+                        tool: "QE Github committer Golden Tool",
+                        color: "linear-gradient(135deg, #0ea5e9, #10b981)",
+                        diagramTitle: "🚀 GitHub Automation",
+                        diagramHtml: `<div class="system-node node-agent">${svgAgent} Git Agent</div><div class="flow-arrows"><div class="label-top" style="color:#0ea5e9;">POST /git/refs</div><div class="flow-top right"><div class="packet packet-primary particle-right">${svgJson}</div></div><div class="flow-bottom left"><div class="packet packet-success particle-left">${svgJson}</div></div><div class="label-bottom" style="color: #10b981;">Returns URL</div></div><div class="system-node" style="color:white; border-color:white;"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.6.113.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg> GitHub Server</div>`,
+                        instructions: [
+                            "Invoke 'QE Github committer Golden Tool' with the files JSON array.",
+                            "Create a new branch with the current timestamp.",
+                            "Commit all files in a single commit.",
+                            "Extract the branch URL if successful, or error message on failure.",
+                            "Create a Pull Request (PR) using the new branch."
+                        ]
+                    }
+                };
+
+                // User Stories Database: Story-specific test cases, Playwright scripts, and GitHub commits
+                const storiesDatabase = {
+                    "default": {
+                        title: "Default Template",
+                        ticketKey: "Default",
+                        agents: {
+                            "1": {
+                                diagramText: "<strong>Working Model:</strong> Fetches raw Xray test cases QS-110 and QS-112 from Jira by invoking the XrayJiraFetcherTool.",
+                                input: `{\n  "task_ids": "QS-110, QS-112"\n}`,
+                                output: `[\n  {\n    "test_key": "QS-110",\n    "summary": "Verify login functionality",\n    "test_type": "Functional",\n    "description": "Standard login flow verification with valid credentials",\n    "steps": [\n      { "action": "Navigate to login", "data": "/login", "expected_result": "Login form displayed" },\n      { "action": "Submit credentials", "data": "user: test, pass: **** ", "expected_result": "Dashboard loaded" }\n    ]\n  }\n]`
+                            },
+                            "2": {
+                                diagramText: "<strong>Working Model:</strong> Consumes Test Case JSON, Framework KB, and Locators KB to synthesize production-ready Playwright code following Page Object Model rules.",
+                                input: `[\n  {\n    "test_key": "QS-110",\n    "summary": "Verify login functionality..."\n  }\n]`,
+                                output: `[\n  {\n    "file_name": "src/tests/application/example.spec.js",\n    "Code": "const { test, expect } = require('../../fixtures');\\n\\ntest('example', async ({ page }) => {\\n  await page.goto('/login');\\n  await page.fill('#username', 'test');\\n  await page.fill('#password', 'secret');\\n  await page.click('#submit-btn');\\n  await expect(page).toHaveURL(/.*dashboard/);\\n});"\n  }\n]`
+                            },
+                            "3": {
+                                diagramText: "<strong>Working Model:</strong> Automatically creates a new branch, commits all provided files in a single commit, and returns the branch URL. <br/><strong style='color:var(--accent);'>Note:</strong> The agent also immediately prepares and opens a Pull Request (PR) from the newly created branch.",
+                                input: `[\n  {\n    "file_name": "src/tests/application/example.spec.js",\n    "Code": "..."\n  }\n]`,
+                                output: `{\n  "Output_url": "https://github.com/repo/branches/branch-20231012-123456",\n  "pull_request_url": "https://github.com/repo/pull/104"\n}`
+                            }
+                        }
+                    },
+                    "banking": {
+                        title: "Banking: Funds Transfer & Limit Check",
+                        ticketKey: "BANK-101",
+                        agents: {
+                            "1": {
+                                diagramText: "<strong>Working Model:</strong> Fetches verified Xray test cases BANK-TC-01 (AC1: Funds Transfer) and BANK-TC-02 (AC2: Limit Check) from Jira.",
+                                input: `{\n  "task_ids": "BANK-TC-01, BANK-TC-02"\n}`,
+                                output: `[\n  {\n    "test_key": "BANK-TC-01",\n    "summary": "[BANK-101] [AC1] Verify Successful Fund Transfer Within Daily Limit",\n    "test_type": "Functional",\n    "description": "Ensure transfer completes and updates balance accurately when amount <= daily limit.",\n    "steps": [\n      { "action": "Login and open Transfer tab", "data": "acct: '1001-2002'", "expected_result": "Transfer form rendered with current balance" },\n      { "action": "Enter recipient and amount", "data": "recipient: '4455-6677', amount: 500", "expected_result": "Transfer confirmation modal displayed" },\n      { "action": "Click Confirm Transfer", "data": "action: 'confirm'", "expected_result": "Transfer Success receipt with reference ID shown" }\n    ]\n  },\n  {\n    "test_key": "BANK-TC-02",\n    "summary": "[BANK-101] [AC2] Verify Transfer Blocked When Exceeding Daily Limit",\n    "test_type": "Functional",\n    "description": "Ensure transfer is rejected when amount > daily limit of $10,000.",\n    "steps": [\n      { "action": "Enter recipient and excessive amount", "data": "recipient: '4455-6677', amount: 12000", "expected_result": "Validation error 'Daily transfer limit of $10,000 exceeded'" },\n      { "action": "Verify Confirm button", "data": "state: 'disabled'", "expected_result": "Submit button disabled, transfer blocked" }\n    ]\n  }\n]`
+                            },
+                            "2": {
+                                diagramText: "<strong>Working Model:</strong> Synthesizes modular Playwright Page Object Model scripts (`TransferPage.js` and `transfer.spec.js`) adhering to banking POM framework standards.",
+                                input: `[\n  {\n    "test_key": "BANK-TC-01",\n    "summary": "[AC1] Fund Transfer Within Limit"\n  },\n  {\n    "test_key": "BANK-TC-02",\n    "summary": "[AC2] Limit Check Exceeded"\n  }\n]`,
+                                output: `[\n  {\n    "file_name": "src/pages/banking/TransferPage.js",\n    "Code": "class TransferPage {\\n  constructor(page) {\\n    this.page = page;\\n    this.recipientInput = page.locator('#recipient-acct');\\n    this.amountInput = page.locator('#transfer-amount');\\n    this.confirmBtn = page.locator('#btn-confirm-transfer');\\n    this.receiptAlert = page.locator('.transfer-receipt');\\n    this.limitErrorMsg = page.locator('.error-limit-exceeded');\\n  }\\n  async transfer(recipient, amount) {\\n    await this.recipientInput.fill(recipient);\\n    await this.amountInput.fill(amount.toString());\\n    await this.confirmBtn.click();\\n  }\\n}\\nmodule.exports = { TransferPage };"\n  },\n  {\n    "file_name": "src/tests/banking/transfer.spec.js",\n    "Code": "const { test, expect } = require('@playwright/test');\\nconst { TransferPage } = require('../../pages/banking/TransferPage');\\n\\ntest.describe('BANK-101: Funds Transfer & Limit Check', () => {\\n  test('AC1: Transfer within limit succeeds', async ({ page }) => {\\n    const transferPage = new TransferPage(page);\\n    await page.goto('/banking/transfer');\\n    await transferPage.transfer('4455-6677', 500);\\n    await expect(transferPage.receiptAlert).toBeVisible();\\n  });\\n\\n  test('AC2: Transfer exceeding $10,000 daily limit is blocked', async ({ page }) => {\\n    const transferPage = new TransferPage(page);\\n    await page.goto('/banking/transfer');\\n    await transferPage.recipientInput.fill('4455-6677');\\n    await transferPage.amountInput.fill('12000');\\n    await expect(transferPage.limitErrorMsg).toHaveText('Daily transfer limit of $10,000 exceeded');\\n    await expect(transferPage.confirmBtn).toBeDisabled();\\n  });\\n});"\n  }\n]`
+                            },
+                            "3": {
+                                diagramText: "<strong>Working Model:</strong> Automatically creates feature branch `feature/BANK-101-transfer-scripts`, commits `TransferPage.js` and `transfer.spec.js`, and opens a GitHub PR.",
+                                input: `[\n  { "file_name": "src/pages/banking/TransferPage.js", "Code": "..." },\n  { "file_name": "src/tests/banking/transfer.spec.js", "Code": "..." }\n]`,
+                                output: `{\n  "branch": "feature/BANK-101-transfer-scripts",\n  "Output_url": "https://github.com/bank-org/core-banking-tests/tree/feature/BANK-101-transfer-scripts",\n  "commit_id": "a91f48e2c77d",\n  "pull_request_url": "https://github.com/bank-org/core-banking-tests/pull/342"\n}`
+                            }
+                        }
+                    },
+                    "healthcare": {
+                        title: "Healthcare: Doctor Appointment Booking",
+                        ticketKey: "CARE-202",
+                        agents: {
+                            "1": {
+                                diagramText: "<strong>Working Model:</strong> Fetches verified Xray test cases CARE-TC-01 (AC1: Booking Confirmation) and CARE-TC-02 (AC2: Prevent Double Booking) from Jira.",
+                                input: `{\n  "task_ids": "CARE-TC-01, CARE-TC-02"\n}`,
+                                output: `[\n  {\n    "test_key": "CARE-TC-01",\n    "summary": "[CARE-202] [AC1] Verify Successful Doctor Appointment Booking for Available Slot",\n    "test_type": "Functional",\n    "description": "Patient selects practitioner, chooses 10:00 AM slot, and receives booking confirmation ID.",\n    "steps": [\n      { "action": "Select practitioner Dr. Smith", "data": "doctor_id: 'DOC-102'", "expected_result": "Calendar renders open slots" },\n      { "action": "Pick 10:00 AM slot and submit", "data": "slot: '10:00 AM', patient: 'PT-9901'", "expected_result": "Booking confirmation screen with appointment ID displayed" }\n    ]\n  },\n  {\n    "test_key": "CARE-TC-02",\n    "summary": "[CARE-202] [AC2] Verify Already Booked Slot Is Disabled",\n    "test_type": "Functional",\n    "description": "Ensure previously reserved slot shows as disabled and cannot be confirmed.",\n    "steps": [\n      { "action": "Attempt click on 11:00 AM reserved slot", "data": "slot: '11:00 AM (Reserved)'", "expected_result": "Slot shows 'Slot Unavailable' and cannot be selected" },\n      { "action": "Verify submit button", "data": "state: 'disabled'", "expected_result": "Confirm Appointment button remains disabled" }\n    ]\n  }\n]`
+                            },
+                            "2": {
+                                diagramText: "<strong>Working Model:</strong> Synthesizes modular Playwright Page Object Model scripts (`AppointmentPage.js` and `appointment.spec.js`) adhering to healthcare POM framework standards.",
+                                input: `[\n  {\n    "test_key": "CARE-TC-01",\n    "summary": "[AC1] Doctor Appointment Booking"\n  },\n  {\n    "test_key": "CARE-TC-02",\n    "summary": "[AC2] Prevent Double Booking"\n  }\n]`,
+                                output: `[\n  {\n    "file_name": "src/pages/healthcare/AppointmentPage.js",\n    "Code": "class AppointmentPage {\\n  constructor(page) {\\n    this.page = page;\\n    this.doctorSelect = page.locator('#doctor-dropdown');\\n    this.availableSlot = page.locator('.slot.available');\\n    this.bookedSlot = page.locator('.slot.booked');\\n    this.confirmBtn = page.locator('#btn-book-appointment');\\n    this.confirmationCard = page.locator('.booking-confirmation');\\n  }\\n  async bookSlot(doctor, timeSlot) {\\n    await this.doctorSelect.selectOption({ label: doctor });\\n    await this.page.locator(\`.slot:has-text(\\"\${timeSlot}\\")\`).click();\\n    await this.confirmBtn.click();\\n  }\\n}\\nmodule.exports = { AppointmentPage };"\n  },\n  {\n    "file_name": "src/tests/healthcare/appointment.spec.js",\n    "Code": "const { test, expect } = require('@playwright/test');\\nconst { AppointmentPage } = require('../../pages/healthcare/AppointmentPage');\\n\\ntest.describe('CARE-202: Doctor Appointment Booking', () => {\\n  test('AC1: Patient successfully books 10:00 AM slot', async ({ page }) => {\\n    const appointmentPage = new AppointmentPage(page);\\n    await page.goto('/appointments/book');\\n    await appointmentPage.bookSlot('Dr. Smith', '10:00 AM');\\n    await expect(appointmentPage.confirmationCard).toBeVisible();\\n    await expect(appointmentPage.confirmationCard).toContainText('Appointment Confirmed');\\n  });\\n\\n  test('AC2: Already booked slot cannot be selected', async ({ page }) => {\\n    const appointmentPage = new AppointmentPage(page);\\n    await page.goto('/appointments/book');\\n    await appointmentPage.doctorSelect.selectOption({ label: 'Dr. Smith' });\\n    const slot = page.locator('.slot:has-text(\\"11:00 AM\\")');\\n    await expect(slot).toHaveClass(/booked/);\\n    await expect(slot).toBeDisabled();\\n    await expect(appointmentPage.confirmBtn).toBeDisabled();\\n  });\\n});"\n  }\n]`
+                            },
+                            "3": {
+                                diagramText: "<strong>Working Model:</strong> Automatically creates feature branch `feature/CARE-202-appointment-tests`, commits `AppointmentPage.js` and `appointment.spec.js`, and opens a GitHub PR.",
+                                input: `[\n  { "file_name": "src/pages/healthcare/AppointmentPage.js", "Code": "..." },\n  { "file_name": "src/tests/healthcare/appointment.spec.js", "Code": "..." }\n]`,
+                                output: `{\n  "branch": "feature/CARE-202-appointment-tests",\n  "Output_url": "https://github.com/health-org/patient-portal-tests/tree/feature/CARE-202-appointment-tests",\n  "commit_id": "c83b1290e44a",\n  "pull_request_url": "https://github.com/health-org/patient-portal-tests/pull/189"\n}`
+                            }
+                        }
+                    }
+                };
+
+                // State
+                let currentStory = "default";
+                let currentActiveAgent = "1";
+                let isSimulating = false;
+
+                const nodes = document.querySelectorAll('.agent-node');
+                const emptyState = document.getElementById('emptyState');
+                const detailsContent = document.getElementById('detailsContent');
+                const btnSimulate = document.getElementById('btnSimulate');
+                const storySelect = document.getElementById('storySelect');
+                const ticketPill = document.getElementById('ticketPill');
+                const btnPrevAgent = document.getElementById('btnPrevAgent');
+                const btnNextAgent = document.getElementById('btnNextAgent');
+                const agentNavIndicator = document.getElementById('agentNavIndicator');
+
+                // Detail elements
+                const pIcon = document.getElementById('pIcon');
+                const pTitle = document.getElementById('pTitle');
+                const pTool = document.getElementById('pTool');
+                const pInputRaw = document.getElementById('pInputRaw');
+                const pInputFormatted = document.getElementById('pInputFormatted');
+                const pInstructionsList = document.getElementById('pInstructionsList');
+                const pOutputRaw = document.getElementById('pOutputRaw');
+                const pOutputFormatted = document.getElementById('pOutputFormatted');
+                const pDiagramWrapper = document.getElementById('pDiagramWrapper');
+                const pDiagramTitle = document.getElementById('pDiagramTitle');
+                const pDiagramContent = document.getElementById('pDiagramContent');
+                const pDiagramExplanation = document.getElementById('pDiagramExplanation');
+
+                // Custom lightweight JSON Syntax Highlighter
+                function syntaxHighlight(json) {
+                    if (typeof json != 'string') json = JSON.stringify(json, undefined, 2);
+                    json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                        let cls = 'json-number';
+                        if (/^"/.test(match)) {
+                            if (/:$/.test(match)) { cls = 'json-key'; }
+                            else { cls = 'json-string'; }
+                        } else if (/true|false/.test(match)) {
+                            cls = 'json-boolean';
+                        } else if (/null/.test(match)) {
+                            cls = 'json-boolean';
+                        }
+                        return '<span class="' + cls + '">' + match + '</span>';
+                    });
+                }
+
+                // Story Selector Change Handler
+                if (storySelect) {
+                    storySelect.addEventListener('change', (e) => {
+                        currentStory = e.target.value;
+                        const story = storiesDatabase[currentStory];
+                        if (ticketPill && story) {
+                            ticketPill.textContent = story.ticketKey;
+                        }
+                        if (currentActiveAgent) {
+                            populateDetails(currentActiveAgent);
+                        }
+                    });
+                }
+
+                // Update arrow button disabled states (bounded strictly between 1 and 3)
+                function updateNavButtonsState() {
+                    const idNum = parseInt(currentActiveAgent || "1", 10);
+                    if (btnPrevAgent) btnPrevAgent.disabled = isSimulating || idNum <= 1;
+                    if (btnNextAgent) btnNextAgent.disabled = isSimulating || idNum >= 3;
+                }
+
+                // Select Agent Helper (Works before or after simulation, or via arrows/clicks)
+                function selectAgent(agentId, smoothScroll = true) {
+                    let idNum = parseInt(agentId, 10);
+                    if (isNaN(idNum) || idNum < 1) idNum = 1;
+                    if (idNum > 3) idNum = 3;
+                    const strId = String(idNum);
+                    currentActiveAgent = strId;
+
+                    if (agentNavIndicator) {
+                        agentNavIndicator.textContent = "0" + strId;
+                    }
+
+                    nodes.forEach(n => {
+                        if (n.getAttribute('data-agent') === strId) {
+                            n.classList.add('active');
+                            if (smoothScroll && pipelineWrapper) {
+                                const nodeLeft = n.offsetLeft;
+                                const wrapperScroll = pipelineWrapper.scrollLeft;
+                                const wrapperWidth = pipelineWrapper.clientWidth;
+                                if (nodeLeft < wrapperScroll + 50 || nodeLeft > wrapperScroll + wrapperWidth - 280) {
+                                    pipelineWrapper.scrollTo({ left: Math.max(0, nodeLeft - 80), behavior: 'smooth' });
+                                }
+                            }
+                        } else {
+                            n.classList.remove('active');
+                        }
+                    });
+
+                    populateDetails(strId);
+                    updateNavButtonsState();
+                }
+
+                // Arrow buttons to switch between agents (strictly bounded between 1 and 3)
+                if (btnPrevAgent) {
+                    btnPrevAgent.addEventListener('click', () => {
+                        if (isSimulating) return;
+                        let current = parseInt(currentActiveAgent || "1", 10);
+                        if (current <= 1) return; // Cannot go left after 1
+                        selectAgent(current - 1, true);
+                    });
+                }
+
+                if (btnNextAgent) {
+                    btnNextAgent.addEventListener('click', () => {
+                        if (isSimulating) return;
+                        let current = parseInt(currentActiveAgent || "1", 10);
+                        if (current >= 3) return; // Cannot go right after 3
+                        selectAgent(current + 1, true);
+                    });
+                }
+
+                // Agent Node Hover / Click
+                nodes.forEach(node => {
+                    const activate = () => {
+                        if (isSimulating) return;
+                        const agentId = node.getAttribute('data-agent');
+                        selectAgent(agentId, false);
+                    };
+                    node.addEventListener('mouseenter', activate);
+                    node.addEventListener('click', activate);
+                });
+
+                function populateDetails(agentId) {
+                    const base = baseAgents[agentId];
+                    const story = storiesDatabase[currentStory] || storiesDatabase["default"];
+                    const storyAgent = (story.agents && story.agents[agentId]) || {};
+
+                    if (base) {
+                        emptyState.style.display = 'none';
+
+                        detailsContent.classList.remove('visible');
+                        void detailsContent.offsetWidth; // trigger reflow
+
+                        pIcon.textContent = "0" + agentId;
+                        pIcon.style.background = base.color;
+                        pTitle.textContent = base.title;
+                        if (base.tool) {
+                            pTool.parentNode.style.display = 'block';
+                            pTool.textContent = base.tool;
+                        } else {
+                            pTool.parentNode.style.display = 'none';
+                        }
+
+                        const inputData = storyAgent.input || "{}";
+                        const outputData = storyAgent.output || "{}";
+                        const diagramExplanation = storyAgent.diagramText || base.instructions.join(" ");
+
+                        // Set Raw data
+                        pInputRaw.innerText = inputData;
+                        pOutputRaw.innerText = outputData;
+
+                        // Set Formatted data with syntax highlighting
+                        pInputFormatted.innerHTML = syntaxHighlight(inputData);
+                        pOutputFormatted.innerHTML = syntaxHighlight(outputData);
+
+                        pDiagramWrapper.style.display = 'flex';
+                        pDiagramTitle.innerHTML = base.diagramTitle;
+                        pDiagramContent.innerHTML = base.diagramHtml;
+                        pDiagramExplanation.innerHTML = diagramExplanation;
+
+                        // Base Instructions remain unchanged across stories
+                        pInstructionsList.innerHTML = '';
+                        base.instructions.forEach(inst => {
+                            const li = document.createElement('li');
+                            li.textContent = inst;
+                            pInstructionsList.appendChild(li);
+                        });
+
+                        detailsContent.classList.add('visible');
+                    }
+                }
+
+                // Copy functionality
+                window.copyCode = function (elementId, btnElement) {
+                    const text = document.getElementById(elementId).innerText;
+                    navigator.clipboard.writeText(text).then(() => {
+                        const originalHtml = btnElement.innerHTML;
+                        btnElement.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Copied!`;
+                        btnElement.classList.add('copied');
+                        setTimeout(() => {
+                            btnElement.innerHTML = originalHtml;
+                            btnElement.classList.remove('copied');
+                        }, 2000);
+                    });
+                }
+
+                // Draggable Pipeline Canvas functionality
+                const pipelineWrapper = document.getElementById('pipelineWrapper');
+                const pipeline = document.getElementById('pipeline');
+                let isDown = false;
+                let startX;
+                let scrollLeft;
+
+                pipelineWrapper.addEventListener('mousedown', (e) => {
+                    isDown = true;
+                    startX = e.pageX - pipelineWrapper.offsetLeft;
+                    scrollLeft = pipelineWrapper.scrollLeft;
+                });
+                pipelineWrapper.addEventListener('mouseleave', () => { isDown = false; });
+                pipelineWrapper.addEventListener('mouseup', () => { isDown = false; });
+                pipelineWrapper.addEventListener('mousemove', (e) => {
+                    if (!isDown) return;
+                    e.preventDefault();
+                    const x = e.pageX - pipelineWrapper.offsetLeft;
+                    const walk = (x - startX) * 2; // scroll-fast
+                    pipelineWrapper.scrollLeft = scrollLeft - walk;
+                });
+
+                // Simulation functionality
+                const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+                btnSimulate.addEventListener('click', async () => {
+                    if (isSimulating) return;
+                    isSimulating = true;
+                    btnSimulate.disabled = true;
+                    btnSimulate.innerHTML = `<div class="sim-spinner"></div> Running...`;
+                    updateNavButtonsState();
+
+                    // Reset
+                    nodes.forEach(n => {
+                        n.classList.remove('active', 'simulating');
+                        const status = n.querySelector('.pipeline-status');
+                        status.innerHTML = `<div class="sim-spinner"></div> Processing`;
+                    });
+                    document.querySelectorAll('.connector').forEach(c => {
+                        c.classList.remove('flowing', 'filled');
+                        const flow = c.querySelector('.connector-flow');
+                        if (flow) {
+                            flow.style.transition = 'none';
+                            flow.style.width = '0';
+                            void flow.offsetWidth; // force reflow
+                            flow.style.transition = '';
+                        }
+                    });
+                    emptyState.style.display = 'flex';
+                    detailsContent.classList.remove('visible');
+
+                    // Scroll container to start
+                    pipelineWrapper.scrollTo({ left: 0, behavior: 'smooth' });
+
+                    for (let i = 0; i < nodes.length; i++) {
+                        const node = nodes[i];
+                        const agentId = node.getAttribute('data-agent');
+                        currentActiveAgent = agentId;
+                        if (agentNavIndicator) agentNavIndicator.textContent = "0" + agentId;
+
+                        // Scroll to node if offscreen
+                        if (node.offsetLeft > pipelineWrapper.scrollLeft + pipelineWrapper.clientWidth - 300) {
+                            pipelineWrapper.scrollTo({ left: node.offsetLeft - 100, behavior: 'smooth' });
+                        }
+
+                        // Activate node
+                        node.classList.add('simulating');
+                        populateDetails(agentId);
+
+                        // Wait to simulate processing time
+                        await sleep(2500);
+
+                        // Complete node
+                        node.classList.remove('simulating');
+                        node.querySelector('.pipeline-status').innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Completed`;
+                        node.classList.add('simulating'); // Keep green status visible
+                        node.style.borderColor = "var(--card-border)";
+                        node.style.boxShadow = "none";
+
+                        // Trigger Data Particle Flow to next agent
+                        const connector = node.nextElementSibling;
+                        if (connector && connector.classList.contains('connector')) {
+                            connector.classList.add('flowing');
+                            await sleep(1000); // 1 second of particle flow
+                            connector.classList.remove('flowing');
+                            connector.classList.add('filled');
+                        } else {
+                            await sleep(500);
+                        }
+                    }
+
+                    // Finish
+                    isSimulating = false;
+                    btnSimulate.disabled = false;
+                    btnSimulate.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Run Again`;
+                    updateNavButtonsState();
+
+                    setTimeout(() => {
+                        nodes.forEach(n => {
+                            n.classList.remove('simulating');
+                        });
+                    }, 3000);
+                });
+
+                // Initial entrance animations & default agent selection
+                document.addEventListener("DOMContentLoaded", () => {
+                    nodes.forEach((node, index) => {
+                        node.style.opacity = '0';
+                        node.style.transform = 'translateY(20px)';
+
+                        setTimeout(() => {
+                            node.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+                            node.style.opacity = '1';
+                            node.style.transform = 'translateY(0)';
+                        }, index * 250);
+                    });
+
+                    // Initialize default agent 01 selection & bounded nav states
+                    selectAgent("1", false);
+                });
+
+                // Fullscreen functionality
+                const btnFullscreen = document.getElementById('btnFullscreen');
+                const appWindow = document.querySelector('.app-window');
+
+                btnFullscreen.addEventListener('click', () => {
+                    if (!document.fullscreenElement) {
+                        if (appWindow.requestFullscreen) {
+                            appWindow.requestFullscreen();
+                        } else if (appWindow.webkitRequestFullscreen) { /* Safari */
+                            appWindow.webkitRequestFullscreen();
+                        } else if (appWindow.msRequestFullscreen) { /* IE11 */
+                            appWindow.msRequestFullscreen();
+                        }
+                    } else {
+                        if (document.exitFullscreen) {
+                            document.exitFullscreen();
+                        } else if (document.webkitExitFullscreen) { /* Safari */
+                            document.webkitExitFullscreen();
+                        } else if (document.msExitFullscreen) { /* IE11 */
+                            document.msExitFullscreen();
+                        }
+                    }
+                });
+
+                document.addEventListener('fullscreenchange', () => {
+                    if (document.fullscreenElement) {
+                        btnFullscreen.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path></svg> Exit Fullscreen`;
+                    } else {
+                        btnFullscreen.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg> Fullscreen`;
+                    }
+                });
+
+                // Theme Toggle Logic
+                const themeToggle = document.getElementById('themeToggle');
+                const sunIcon = document.getElementById('sunIcon');
+                const moonIcon = document.getElementById('moonIcon');
+
+                themeToggle.addEventListener('click', () => {
+                    document.body.classList.toggle('light-mode');
+                    if (document.body.classList.contains('light-mode')) {
+                        sunIcon.style.display = 'none';
+                        moonIcon.style.display = 'block';
+                    } else {
+                        sunIcon.style.display = 'block';
+                        moonIcon.style.display = 'none';
+                    }
+                });
+            </script>
+
+
+        </div>
+    </section>
+
+</body>
+
+
+</html>

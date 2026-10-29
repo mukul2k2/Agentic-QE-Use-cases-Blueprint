@@ -1,0 +1,2885 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QE UserStory to Testcase - Pipeline Simulator</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --text-color: #f8fafc;
+            --primary: #3b82f6;
+            --secondary: #8b5cf6;
+            --accent: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+
+            /* Syntax Highlighting Colors */
+            --sh-key: #60a5fa;
+            --sh-string: #a78bfa;
+            --sh-number: #f472b6;
+            --sh-boolean: #fbbf24;
+            --sh-punctuation: #cbd5e1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: block;
+            background-image:
+                radial-gradient(circle at 15% 10%, rgba(59, 130, 246, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.15) 0%, transparent 40%);
+        }
+
+        /* Modern Website Additional CSS */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-brand {
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #f8fafc;
+        }
+
+        .navbar-brand svg {
+            color: var(--accent);
+        }
+
+        .hero {
+            padding: 60px 50px 30px 50px;
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3.2rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #60a5fa, #a78bfa, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 18px;
+            line-height: 1.2;
+        }
+
+        .hero p.subtitle {
+            font-size: 1.15rem;
+            color: #94a3b8;
+            max-width: 820px;
+            margin: 0 auto 40px auto;
+            line-height: 1.6;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .feature-card {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 26px;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(96, 165, 250, 0.3);
+            box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.2);
+        }
+
+        .feature-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .feature-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #f8fafc;
+        }
+
+        .feature-desc {
+            font-size: 0.92rem;
+            color: #94a3b8;
+            line-height: 1.55;
+        }
+
+        .app-section {
+            max-width: 1600px;
+            margin: 0 auto 100px auto;
+            padding: 0 20px;
+        }
+
+        .app-window {
+            height: 840px;
+            background: #0f172a;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .app-toolbar {
+            height: 68px;
+            background: #1e293b;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: nowrap;
+        }
+
+        .mac-dots {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .mac-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .mac-dot.red {
+            background: #ef4444;
+        }
+
+        .mac-dot.yellow {
+            background: #f59e0b;
+        }
+
+        .mac-dot.green {
+            background: #10b981;
+        }
+
+        /* Story Selector Controls */
+        .story-selector-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(15, 23, 42, 0.7);
+            padding: 6px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .story-label {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .story-select {
+            background: #1e293b;
+            color: #f8fafc;
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            border-radius: 8px;
+            padding: 5px 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .story-select:hover,
+        .story-select:focus {
+            border-color: #60a5fa;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+        }
+
+        .story-ticket-pill {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Agent Switcher Arrow Controls */
+        .agent-nav-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 3px 6px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-agent-nav {
+            background: #1e293b;
+            color: #f8fafc;
+            border: 1px solid rgba(96, 165, 250, 0.25);
+            border-radius: 6px;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 0;
+        }
+
+        .btn-agent-nav:hover:not(:disabled) {
+            background: #2563eb;
+            color: white;
+            border-color: #60a5fa;
+            transform: translateY(-1px);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-agent-nav:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-agent-nav:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            border-color: rgba(255, 255, 255, 0.05);
+            background: rgba(30, 41, 59, 0.4);
+            color: #64748b;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .agent-nav-indicator {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #60a5fa;
+            min-width: 20px;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+            flex-shrink: 0;
+        }
+
+        .btn-simulate {
+            background: linear-gradient(135deg, var(--accent), #059669);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+            transition: all 0.2s;
+        }
+
+        .btn-simulate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-simulate:disabled {
+            background: #475569;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-heal-test {
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3);
+            transition: all 0.2s;
+        }
+
+        .btn-heal-test:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 14px rgba(139, 92, 246, 0.4);
+        }
+
+        .main-container {
+            height: calc(100% - 68px);
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            padding: 15px 20px 20px 20px;
+            gap: 20px;
+        }
+
+        /* Interactive Canvas */
+        .pipeline-wrapper {
+            flex: 2;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            border-radius: 16px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--card-border);
+            position: relative;
+            cursor: grab;
+
+            /* Animated Data Grid */
+            background-size: 40px 40px;
+            background-image:
+                linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        }
+
+        .pipeline-wrapper:active {
+            cursor: grabbing;
+        }
+
+        .pipeline-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 15px;
+            width: max-content;
+            padding: 40px;
+            pointer-events: auto;
+            transform-origin: left center;
+        }
+
+        .agent-node {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 20px;
+            width: 270px;
+            height: 230px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            user-select: none;
+        }
+
+        .agent-node.active,
+        .agent-node:hover {
+            transform: translateY(-8px);
+            border-color: rgba(96, 165, 250, 0.8);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2),
+                0 0 15px rgba(59, 130, 246, 0.4);
+            background: rgba(40, 55, 75, 0.9);
+        }
+
+        .agent-node.simulating {
+            border-color: var(--accent);
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.5);
+            background: rgba(40, 55, 75, 0.95);
+        }
+
+        .agent-node.healing-active {
+            border-color: #f59e0b !important;
+            box-shadow: 0 0 25px rgba(245, 158, 11, 0.6) !important;
+            animation: pulseHealing 1s infinite alternate;
+        }
+
+        @keyframes pulseHealing {
+            0% {
+                border-color: #f59e0b;
+                box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+            }
+
+            100% {
+                border-color: #ec4899;
+                box-shadow: 0 0 25px rgba(236, 72, 153, 0.6);
+            }
+        }
+
+        .agent-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            gap: 12px;
+        }
+
+        .agent-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
+            flex-shrink: 0;
+        }
+
+        .agent-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .agent-tool {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .agent-tool::before {
+            content: '⚙️';
+            font-size: 0.8rem;
+        }
+
+        /* Tool Classification Badge */
+        .type-badge {
+            display: inline-block;
+            font-size: 0.65rem;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            width: fit-content;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .type-api {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .type-llm {
+            background: rgba(244, 114, 182, 0.15);
+            color: #f472b6;
+            border: 1px solid rgba(244, 114, 182, 0.3);
+        }
+
+        .pipeline-status {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #cbd5e1;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .simulating .pipeline-status {
+            opacity: 1;
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .healing-active .pipeline-status {
+            opacity: 1;
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .sim-spinner {
+            width: 10px;
+            height: 10px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .connector {
+            width: 40px;
+            height: 2px;
+            background-color: #334155;
+            position: relative;
+        }
+
+        .connector-flow {
+            position: absolute;
+            top: -3px;
+            left: 0;
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent);
+            opacity: 0;
+        }
+
+        .agent-node.active+.connector .connector-flow,
+        .agent-node:hover+.connector .connector-flow,
+        .agent-node.simulating+.connector .connector-flow {
+            opacity: 1;
+            animation: flowAnimation 1s infinite linear;
+        }
+
+        @keyframes flowAnimation {
+            0% {
+                left: 0;
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                left: 100%;
+                opacity: 0;
+            }
+        }
+
+        .connector.flowing .connector-flow {
+            width: 100%;
+            transition: width 1s linear;
+        }
+
+        .connector.filled .connector-flow {
+            width: 100%;
+            transition: none;
+        }
+
+        .connector.flowing::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border-radius: 50%;
+            transform: translateY(-50%);
+            box-shadow: 0 0 15px #fff, 0 0 30px var(--accent);
+            animation: particle-flow 0.35s linear infinite;
+            z-index: 5;
+        }
+
+        @keyframes particle-flow {
+            0% {
+                left: 0;
+                opacity: 0;
+                transform: translateY(-50%) scale(0.5);
+            }
+
+            15% {
+                opacity: 1;
+                transform: translateY(-50%) scale(1.2);
+            }
+
+            85% {
+                opacity: 1;
+                transform: translateY(-50%) scale(1.2);
+            }
+
+            100% {
+                left: calc(100% - 8px);
+                opacity: 0;
+                transform: translateY(-50%) scale(0.5);
+            }
+        }
+
+        .loop-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: linear-gradient(45deg, #f59e0b, #ef4444);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Details Panel */
+        .details-panel {
+            flex: 1;
+            min-width: 500px;
+            max-width: 530px;
+            background: var(--panel-bg);
+            border-radius: 16px;
+            border: 1px solid var(--card-border);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            box-shadow: -5px 0 25px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .details-empty {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-size: 1.1rem;
+            text-align: center;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .details-empty svg {
+            width: 48px;
+            height: 48px;
+            opacity: 0.5;
+        }
+
+        .details-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .details-content.visible {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .panel-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .panel-title {
+            font-size: 1.4rem;
+            color: #fff;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .panel-tool {
+            color: var(--primary);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* Live Optimization Widget in Detail Panel */
+        .self-healing-card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.1);
+        }
+
+        .self-healing-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .self-healing-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #f59e0b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .healing-stepper {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .healing-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 0.85rem;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: rgba(30, 41, 59, 0.6);
+            border-left: 3px solid #64748b;
+            transition: all 0.3s;
+        }
+
+        .healing-step.pass {
+            border-left-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .healing-step.fail {
+            border-left-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .healing-step.repairing {
+            border-left-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+            animation: pulseHealing 1s infinite alternate;
+        }
+
+        .step-badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .step-badge.fail {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+
+        .step-badge.pass {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+        }
+
+        .step-badge.repair {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+        }
+
+        /* Telemetry & Confidence Score within Live Optimization Card */
+        .healing-telemetry-panel {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .telemetry-metrics {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .telemetry-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+        }
+
+        .telemetry-label {
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        .telemetry-threshold-badge {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+        }
+
+        .telemetry-score-badge {
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            transition: all 0.3s;
+        }
+
+        .telemetry-score-badge.pass {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .telemetry-score-badge.fail {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .telemetry-score-badge.repair {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .confidence-gauge-bar {
+            position: relative;
+            padding-top: 14px;
+        }
+
+        .gauge-track {
+            height: 8px;
+            background: #1e293b;
+            border-radius: 4px;
+            position: relative;
+            overflow: visible;
+        }
+
+        .gauge-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease;
+        }
+
+        .gauge-fill.pass {
+            background: linear-gradient(90deg, #10b981, #34d399);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+        }
+
+        .gauge-fill.fail {
+            background: linear-gradient(90deg, #ef4444, #f87171);
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+        }
+
+        .gauge-fill.repair {
+            background: linear-gradient(90deg, #f59e0b, #fbbf24);
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+        }
+
+        .gauge-threshold-pin {
+            position: absolute;
+            top: -4px;
+            bottom: -4px;
+            width: 2px;
+            background: #f59e0b;
+            transform: translateX(-50%);
+            z-index: 2;
+        }
+
+        .threshold-pin-label {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.65rem;
+            color: #f59e0b;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .step-score-pill {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 1px 5px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+
+        .step-score-pill.fail {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .step-score-pill.pass {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .step-score-pill.repair {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .detail-section {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .detail-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #cbd5e1;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .copy-btn.copied {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .detail-box {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            border-left: 3px solid var(--secondary);
+        }
+
+        /* Syntax Highlighted Code Box */
+        .detail-box.code {
+            font-family: 'Consolas', 'Courier New', Courier, monospace;
+            font-size: 0.84rem;
+            background: #0f172a;
+            border-left-color: var(--accent);
+            overflow-x: auto;
+            max-height: 260px;
+            overflow-y: auto;
+        }
+
+        .json-key {
+            color: var(--sh-key);
+        }
+
+        .json-string {
+            color: var(--sh-string);
+        }
+
+        .json-number {
+            color: var(--sh-number);
+        }
+
+        .json-boolean {
+            color: var(--sh-boolean);
+        }
+
+        .json-punctuation {
+            color: var(--sh-punctuation);
+        }
+
+        .instructions-list {
+            padding-left: 20px;
+            margin-top: 5px;
+        }
+
+        .instructions-list li {
+            margin-bottom: 8px;
+        }
+
+        /* Generic Diagram Wrapper */
+        .diagram-wrapper {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px dashed var(--accent);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .interactive-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            width: 100%;
+        }
+
+        .system-node {
+            background: #1e293b;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .node-agent {
+            border-top: 3px solid #3b82f6;
+        }
+
+        .node-qa {
+            border-top: 3px solid #f59e0b;
+        }
+
+        .node-jira {
+            border-top: 3px solid #2684FF;
+        }
+
+        .node-xray {
+            border-top: 3px solid #ff5630;
+        }
+
+        .node-orchestrator {
+            border-top: 3px solid #8b5cf6;
+        }
+
+        .flow-arrows {
+            position: relative;
+            width: 120px;
+            height: 50px;
+            z-index: 1;
+        }
+
+        .flow-top,
+        .flow-bottom {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .flow-top {
+            top: 10px;
+        }
+
+        .flow-bottom {
+            bottom: 10px;
+        }
+
+        .flow-top.right::after,
+        .flow-bottom.right::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: -4px;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            border-left: 5px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .flow-top.left::after,
+        .flow-bottom.left::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: -4px;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            border-right: 5px solid rgba(255, 255, 255, 0.4);
+        }
+
+        /* Animated JSON Packets */
+        .packet {
+            position: absolute;
+            top: -12px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1e293b;
+            border-radius: 4px;
+            border: 1px solid;
+            box-shadow: 0 0 10px;
+        }
+
+        .packet-primary {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+
+        .packet-success {
+            border-color: #10b981;
+            color: #10b981;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+
+        .packet-danger {
+            border-color: #ef4444;
+            color: #ef4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+
+        .packet-warning {
+            border-color: #f59e0b;
+            color: #f59e0b;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+        }
+
+        .packet svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .particle-right {
+            animation: moveRightPacket 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .particle-left {
+            animation: moveLeftPacket 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .particle-down {
+            animation: moveDownPacket 1.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .label-top {
+            position: absolute;
+            top: -15px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.65rem;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        .label-bottom {
+            position: absolute;
+            bottom: -18px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.65rem;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        @keyframes moveRightPacket {
+            0% {
+                left: 0;
+                opacity: 0;
+                transform: scale(0.5);
+            }
+
+            10% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            90% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            100% {
+                left: 90%;
+                opacity: 0;
+                transform: scale(0.5);
+            }
+        }
+
+        @keyframes moveLeftPacket {
+            0% {
+                right: 0;
+                opacity: 0;
+                transform: scale(0.5);
+            }
+
+            10% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            90% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            100% {
+                right: 90%;
+                opacity: 0;
+                transform: scale(0.5);
+            }
+        }
+
+        @keyframes moveDownPacket {
+            0% {
+                top: -10px;
+                opacity: 0;
+                transform: scale(0.5);
+            }
+
+            10% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            90% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            100% {
+                top: 30px;
+                opacity: 0;
+                transform: scale(0.5);
+            }
+        }
+
+        .explanation-text {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            text-align: center;
+            margin-top: 30px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 6px;
+            width: 100%;
+            border-left: 3px solid var(--accent);
+        }
+
+        .app-window:-webkit-full-screen {
+            border-radius: 0;
+            border: none;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .app-window:fullscreen {
+            border-radius: 0;
+            border: none;
+            width: 100vw;
+            height: 100vh;
+        }
+
+
+        @media (max-width: 900px) {
+            .agent-list {
+                grid-template-columns: 1fr;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .app-toolbar {
+                flex-wrap: wrap;
+                height: auto;
+                padding: 12px;
+                gap: 10px;
+            }
+
+            .main-container {
+                flex-direction: column;
+                height: auto;
+                overflow-y: auto;
+            }
+
+            .details-panel {
+                min-width: 100%;
+                max-width: 100%;
+            }
+        }
+
+        /* Light Mode Overrides */
+        body.light-mode {
+            --bg-color: #f1f5f9;
+            --panel-bg: #ffffff;
+            --text-color: #0f172a;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-border: rgba(0, 0, 0, 0.1);
+
+            --sh-key: #2563eb;
+            --sh-string: #7c3aed;
+            --sh-number: #db2777;
+            --sh-boolean: #d97706;
+            --sh-punctuation: #475569;
+        }
+
+        body.light-mode .navbar {
+            background: rgba(255, 255, 255, 0.8);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-mode .navbar-brand {
+            color: #0f172a;
+        }
+
+        body.light-mode .navbar a {
+            color: #475569 !important;
+        }
+
+        body.light-mode .hero h1 {
+            color: #0f172a;
+        }
+
+        body.light-mode .hero p.subtitle {
+            color: #475569;
+        }
+
+        body.light-mode .feature-card {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        body.light-mode .feature-card:hover {
+            background: #ffffff;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-mode .feature-title {
+            color: #0f172a;
+        }
+
+        body.light-mode .feature-desc {
+            color: #475569;
+        }
+
+        body.light-mode .app-window {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        }
+
+        body.light-mode .app-toolbar {
+            background: #e2e8f0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-mode .story-selector-container {
+            background: #ffffff;
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-mode .story-select {
+            background: #f8fafc;
+            color: #0f172a;
+            border-color: rgba(0, 0, 0, 0.2);
+        }
+
+        body.light-mode .btn-simulate {
+            background: #ffffff;
+            color: #0f172a;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-mode .agent-node {
+            background: #ffffff;
+        }
+
+        body.light-mode .agent-title {
+            color: #0f172a;
+        }
+
+        body.light-mode .agent-node p {
+            color: #475569 !important;
+        }
+
+        body.light-mode .details-panel {
+            background: #ffffff;
+            border-left: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-mode .details-empty {
+            color: #64748b;
+        }
+
+        body.light-mode .panel-title {
+            color: #0f172a;
+        }
+
+        body.light-mode .detail-box {
+            background: #f8fafc;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-mode .detail-label {
+            color: #475569;
+        }
+
+        body.light-mode .instructions-list li {
+            color: #475569;
+        }
+
+        body.light-mode .system-node {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #0f172a;
+        }
+
+
+        body.light-mode .agent-info h4 {
+            color: #0f172a;
+        }
+
+        body.light-mode .sub-agents span {
+            color: #475569;
+        }
+
+        body.light-mode .self-healing-card {
+            background: #f8fafc;
+            border-color: rgba(245, 158, 11, 0.4);
+        }
+
+        body.light-mode .healing-step {
+            background: #ffffff;
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            background: var(--panel-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1000;
+            color: var(--text-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        body.light-mode .theme-toggle {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle Light/Dark Mode">
+        <svg id="moonIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            style="display: none;">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+        <svg id="sunIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+    </button>
+
+    <!-- Modern Navbar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" />
+            </svg>
+            QE Studio
+        </div>
+        <div style="display: flex; gap: 20px; align-items: center;">
+            <a href="#demo" style="color: #cbd5e1; text-decoration: none; font-size: 0.9rem; font-weight: 600;">View
+                Simulation</a>
+
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <h1>UserStory to Testcase</h1>
+        <p class="subtitle">
+            A multi-agent AI pipeline that securely extracts user story requirements directly from Jira, intelligently
+            generates deduplicated scenarios and test cases, and automatically pushes them back as linked subtasks into
+            Xray—all without human intervention.
+        </p>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                    </svg>
+                </div>
+                <h3 class="feature-title">Zero Manual Effort</h3>
+                <p class="feature-desc">Eliminates tedious manual test writing by automatically converting user stories
+                    into structured JSON test bundles.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon" style="color: #60a5fa; background: rgba(59, 130, 246, 0.1);">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                </div>
+                <h3 class="feature-title">Optimization Accuracy</h3>
+                <p class="feature-desc">The internal QA/Gen Agent feedback loops ensure perfect schema formatting and
+                    maximum edge-case coverage.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon" style="color: #a78bfa; background: rgba(167, 139, 250, 0.1);">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                        <line x1="8" y1="21" x2="16" y2="21" />
+                        <line x1="12" y1="17" x2="12" y2="21" />
+                    </svg>
+                </div>
+                <h3 class="feature-title">Enterprise Native</h3>
+                <p class="feature-desc">Achieves full traceability by seamlessly syncing with Jira Epics and Xray
+                    endpoints via secure TLS connections.</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Embedded App Area -->
+    <section class="app-section" id="demo">
+        <div class="app-window">
+            <div class="app-toolbar">
+                <div class="mac-dots">
+                    <div class="mac-dot red"></div>
+                    <div class="mac-dot yellow"></div>
+                    <div class="mac-dot green"></div>
+                </div>
+
+                <!-- Story Persona & Scenario Selector -->
+                <div class="story-selector-container">
+                    <div class="story-label">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                        User Story:
+                    </div>
+                    <select class="story-select" id="storySelect" title="Select a Demo User Story">
+                        <option value="default" selected>Default Template</option>
+                        <option value="banking">🏦 Banking: Funds Transfer & Limit Check (BANK-101)</option>
+                        <option value="healthcare">🏥 Healthcare: Doctor Appointment Booking (CARE-202)</option>
+                    </select>
+                    <span class="story-ticket-pill" id="ticketPill">Default</span>
+                </div>
+
+                <!-- Agent Switcher Arrow Controls (Switch between agents before or after simulation) -->
+                <div class="agent-nav-container" title="Switch between agents (before or after simulation)">
+                    <button class="btn-agent-nav" id="btnPrevAgent" title="Previous Agent" aria-label="Previous Agent"
+                        disabled>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+                    <span class="agent-nav-indicator" id="agentNavIndicator">01</span>
+                    <button class="btn-agent-nav" id="btnNextAgent" title="Next Agent" aria-label="Next Agent">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Toolbar Actions -->
+                <div class="controls">
+                    <button class="btn-simulate" id="btnFullscreen"
+                        style="background: rgba(255,255,255,0.1); box-shadow: none; padding: 7px 12px; font-size: 0.8rem;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3">
+                            </path>
+                        </svg>
+                        Fullscreen
+                    </button>
+                    <button class="btn-simulate" id="btnSimulate">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        Simulate Execution
+                    </button>
+                </div>
+            </div>
+
+            <div class="main-container">
+                <!-- Interactive Draggable Pipeline Area -->
+                <div class="pipeline-wrapper" id="pipelineWrapper">
+                    <div class="pipeline-container" id="pipeline">
+
+                        <!-- Agent 1 -->
+                        <div class="agent-node" data-agent="1">
+                            <div class="agent-header">
+                                <div class="agent-icon">01</div>
+                                <div class="agent-title">Jira Details Fetcher</div>
+                            </div>
+                            <div class="type-badge type-api">🔌 API Integration</div>
+                            <div class="agent-tool">Jira Description Extractor Tool</div>
+                            <p style="font-size: 0.85rem; color: #cbd5e1; flex: 1;">Retrieves linked test scenario
+                                details from Jira.</p>
+                            <div class="pipeline-status">
+                                <div class="sim-spinner"></div> Processing
+                            </div>
+                        </div>
+                        <div class="connector">
+                            <div class="connector-flow"></div>
+                        </div>
+
+                        <!-- Agent 2 -->
+                        <div class="agent-node" data-agent="2">
+                            <div class="loop-badge">Agentic Loop</div>
+                            <div class="agent-header">
+                                <div class="agent-icon" style="background: linear-gradient(135deg, #8b5cf6, #ec4899);">
+                                    02</div>
+                                <div class="agent-title">Scenario Generator</div>
+                            </div>
+                            <div class="type-badge type-llm">🤖 LLM Orchestration</div>
+                            <div class="agent-tool">Scenario Optimization tool</div>
+                            <p style="font-size: 0.85rem; color: #cbd5e1; flex: 1;">Optimization loop between Gen & QA
+                                agents.</p>
+                            <div class="pipeline-status">
+                                <div class="sim-spinner"></div> Processing
+                            </div>
+                        </div>
+                        <div class="connector">
+                            <div class="connector-flow"></div>
+                        </div>
+
+                        <!-- Agent 3 -->
+                        <div class="agent-node" data-agent="3">
+                            <div class="agent-header">
+                                <div class="agent-icon" style="background: linear-gradient(135deg, #0ea5e9, #10b981);">
+                                    03</div>
+                                <div class="agent-title">Jira Task Creator</div>
+                            </div>
+                            <div class="type-badge type-api">🔌 API Integration</div>
+                            <div class="agent-tool">JIRA Task Creator</div>
+                            <p style="font-size: 0.85rem; color: #cbd5e1; flex: 1;">Automates creation and linking of
+                                JIRA tasks.</p>
+                            <div class="pipeline-status">
+                                <div class="sim-spinner"></div> Processing
+                            </div>
+                        </div>
+                        <div class="connector">
+                            <div class="connector-flow"></div>
+                        </div>
+
+                        <!-- Agent 4 -->
+                        <div class="agent-node" data-agent="4">
+                            <div class="agent-header">
+                                <div class="agent-icon" style="background: linear-gradient(135deg, #f59e0b, #ef4444);">
+                                    04</div>
+                                <div class="agent-title">Subtask Extractor</div>
+                            </div>
+                            <div class="type-badge type-api">🔌 API Integration</div>
+                            <div class="agent-tool">Jira Description Extractor Tool</div>
+                            <p style="font-size: 0.85rem; color: #cbd5e1; flex: 1;">Retrieves detailed story info for
+                                the subtask.</p>
+                            <div class="pipeline-status">
+                                <div class="sim-spinner"></div> Processing
+                            </div>
+                        </div>
+                        <div class="connector">
+                            <div class="connector-flow"></div>
+                        </div>
+
+                        <!-- Agent 5 -->
+                        <div class="agent-node" data-agent="5">
+                            <div class="loop-badge">Agentic Loop</div>
+                            <div class="agent-header">
+                                <div class="agent-icon" style="background: linear-gradient(135deg, #ec4899, #f43f5e);">
+                                    05</div>
+                                <div class="agent-title">Test Case Generator</div>
+                            </div>
+                            <div class="type-badge type-llm">🤖 LLM Orchestration</div>
+                            <div class="agent-tool">TestCases Optimization tool</div>
+                            <p style="font-size: 0.85rem; color: #cbd5e1; flex: 1;">Optimization loop generating test
+                                cases.</p>
+                            <div class="pipeline-status">
+                                <div class="sim-spinner"></div> Processing
+                            </div>
+                        </div>
+                        <div class="connector">
+                            <div class="connector-flow"></div>
+                        </div>
+
+                        <!-- Agent 6 -->
+                        <div class="agent-node" data-agent="6">
+                            <div class="agent-header">
+                                <div class="agent-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                    06</div>
+                                <div class="agent-title">Xray Test Sync</div>
+                            </div>
+                            <div class="type-badge type-api">🔌 API Integration</div>
+                            <div class="agent-tool">Xray Test Case Creator</div>
+                            <p style="font-size: 0.85rem; color: #cbd5e1; flex: 1;">Syncs final generated test cases to
+                                Jira Xray.</p>
+                            <div class="pipeline-status">
+                                <div class="sim-spinner"></div> Processing
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Details Panel -->
+                <div class="details-panel" id="detailsPanel">
+                    <div class="details-empty" id="emptyState">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122">
+                            </path>
+                        </svg>
+                        Hover over an agent node<br>to view its working animation and details.
+                    </div>
+
+                    <div class="details-content" id="detailsContent">
+                        <div class="panel-header">
+                            <div>
+                                <h2 class="panel-title">
+                                    <span id="pIcon" class="agent-icon"
+                                        style="width: 30px; height: 30px; font-size: 0.9rem;">01</span>
+                                    <span id="pTitle">Agent Title</span>
+                                </h2>
+                                <div class="panel-tool">⚙️ <span id="pTool">Tool Name</span></div>
+                            </div>
+                            <div id="pHealingAction" style="display: none;">
+                                <button class="btn-heal-test" id="btnTriggerHeal"
+                                    title="Trigger Optimization Demonstration">
+                                    <span>⚡ Replay Optimization</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Live Optimization Telemetry Widget -->
+                        <div class="self-healing-card" id="pSelfHealingCard">
+                            <div class="self-healing-header">
+                                <div class="self-healing-title">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <polyline points="23 4 23 10 17 10"></polyline>
+                                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                    </svg>
+                                    Live Optimization Trace
+                                </div>
+                                <span class="step-badge pass" id="healingOutcomeBadge">Approved</span>
+                            </div>
+
+                            <!-- Quality Threshold & Confidence Score Gauge -->
+                            <div class="healing-telemetry-panel">
+                                <div class="telemetry-metrics">
+                                    <div class="telemetry-item">
+                                        <span class="telemetry-label">Quality Threshold:</span>
+                                        <span class="telemetry-threshold-badge">70%</span>
+                                    </div>
+                                    <div class="telemetry-item">
+                                        <span class="telemetry-label">Confidence Score:</span>
+                                        <span class="telemetry-score-badge pass" id="healingConfidenceScore">94%</span>
+                                    </div>
+                                </div>
+                                <div class="confidence-gauge-bar">
+                                    <div class="gauge-track">
+                                        <div class="gauge-fill pass" id="healingGaugeFill" style="width: 94%;"></div>
+                                        <div class="gauge-threshold-pin" style="left: 70%;"
+                                            title="Quality Threshold: 70%">
+                                            <span class="threshold-pin-label">70% Threshold</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="healing-stepper" id="healingStepper">
+                                <!-- Injected dynamically by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Working Animation Container -->
+                        <div class="diagram-wrapper" id="pDiagramWrapper">
+                            <div class="detail-label" id="pDiagramTitle"
+                                style="width: 100%; text-align: left; margin-bottom: 15px;">🔄 Working Process</div>
+                            <div class="interactive-diagram" id="pDiagramContent"></div>
+                            <div class="explanation-text" id="pDiagramExplanation"></div>
+                        </div>
+
+                        <div class="detail-section">
+                            <div class="detail-label">
+                                <span>📥 Inputs</span>
+                                <button class="copy-btn" onclick="copyCode('pInputRaw', this)">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                    </svg> Copy JSON
+                                </button>
+                            </div>
+                            <div class="detail-box code" id="pInputFormatted"></div>
+                            <div id="pInputRaw" style="display:none;"></div>
+                        </div>
+
+                        <div class="detail-section">
+                            <div class="detail-label">📋 Instructions</div>
+                            <div class="detail-box" id="pInstructions">
+                                <ul class="instructions-list" id="pInstructionsList"></ul>
+                            </div>
+                        </div>
+
+                        <div class="detail-section">
+                            <div class="detail-label">
+                                <span>📤 Expected Output</span>
+                                <button class="copy-btn" onclick="copyCode('pOutputRaw', this)">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                    </svg> Copy JSON
+                                </button>
+                            </div>
+                            <div class="detail-box code" id="pOutputFormatted"></div>
+                            <div id="pOutputRaw" style="display:none;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                // SVG Icons for Working Diagrams
+                const svgJira = `<svg viewBox="0 0 24 24" width="24" height="24"><path fill="#2684FF" d="M11.53 12.37l-5.6 5.6-5.6-5.6a1 1 0 0 1 0-1.42l5.6-5.6a1 1 0 0 1 1.42 0l5.6 5.6a1 1 0 0 1 0 1.42z"/><path fill="#2684FF" d="M19.12 12.37l-5.6 5.6-5.6-5.6a1 1 0 0 1 0-1.42l5.6-5.6a1 1 0 0 1 1.42 0l5.6 5.6a1 1 0 0 1 0 1.42z"/><path fill="#0052CC" d="M23.67 11.66l-5.6 5.6a1 1 0 0 1-1.42 0l-5.6-5.6a1 1 0 0 1 0-1.42l5.6-5.6a1 1 0 0 1 1.42 0l5.6 5.6a1 1 0 0 1 0 1.42z"/></svg>`;
+                const svgXray = `<svg viewBox="0 0 24 24" width="24" height="24" stroke="#ff5630" stroke-width="3" fill="none"><path d="M18 6L6 18M6 6l12 12"/></svg>`;
+                const svgAgent = `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><path d="M8 16h.01"/><path d="M16 16h.01"/></svg>`;
+                const svgJson = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><text x="8" y="17" font-size="8" font-family="monospace" stroke="none" fill="currentColor">{}</text></svg>`;
+                const svgOrchestrator = `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#8b5cf6" stroke-width="2"><rect x="2" y="2" width="20" height="6" rx="2"/><rect x="2" y="16" width="20" height="6" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><polyline points="8 12 12 16 16 12"/></svg>`;
+
+                const htmlJiraGet = `
+                    <div class="system-node node-agent">${svgAgent} Extractor</div>
+                    <div class="flow-arrows">
+                        <div class="label-top" style="color: #3b82f6;">GET /issue/{id}</div>
+                        <div class="flow-top right"><div class="packet packet-primary particle-right">${svgJson}</div></div>
+                        <div class="flow-bottom left"><div class="packet packet-success particle-left">${svgJson}</div></div>
+                        <div class="label-bottom" style="color: #10b981;">Returns JSON</div>
+                    </div>
+                    <div class="system-node node-jira">${svgJira} Jira API Server</div>
+                `;
+
+                const htmlSelfHealingLoop = `
+                    <div style="display:flex; flex-direction:column; align-items:center; width: 100%; position: relative;">
+                        <div class="system-node node-orchestrator" style="margin-bottom: 25px; z-index:2; width: 200px; color:#a78bfa;">
+                            ${svgOrchestrator} Orchestrator Tool
+                        </div>
+                        <div style="position: absolute; top: 40px; left: 50%; transform: translateX(-50%); width: 210px; height: 35px; border-top: 2px solid rgba(255,255,255,0.2); border-left: 2px solid rgba(255,255,255,0.2); border-right: 2px solid rgba(255,255,255,0.2); z-index: 1;">
+                            <div class="packet packet-primary particle-down" style="left: -12px;">${svgJson}</div>
+                            <div class="packet packet-primary particle-down" style="right: -12px; animation-delay: 0.5s;">${svgJson}</div>
+                        </div>
+                        <div style="display:flex; align-items:center; justify-content: center; gap: 30px; width: 100%; z-index:2;">
+                            <div class="system-node node-agent" style="color:#3b82f6; width: 120px;">${svgAgent} Gen Agent</div>
+                            <div class="flow-arrows" style="width: 90px;">
+                                <div class="label-top" style="color: #3b82f6;">Submits</div>
+                                <div class="flow-top right"><div class="packet packet-primary particle-right">${svgJson}</div></div>
+                                <div class="flow-bottom left"><div class="packet packet-danger particle-left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div></div>
+                                <div class="label-bottom" style="color: #ef4444;">Feedback</div>
+                            </div>
+                            <div class="system-node node-qa" style="color:#f59e0b; width: 120px;">${svgAgent} QA Reviewer</div>
+                        </div>
+                    </div>
+                `;
+
+                const htmlJiraPost = `
+                    <div class="system-node node-agent">${svgAgent} Creator Agent</div>
+                    <div class="flow-arrows">
+                        <div class="label-top" style="color: #f59e0b;">POST /issue</div>
+                        <div class="flow-top right"><div class="packet packet-warning particle-right">${svgJson}</div></div>
+                        <div class="flow-bottom right"><div class="packet packet-primary particle-right" style="animation-delay: 1s;">${svgJson}</div></div>
+                        <div class="label-bottom" style="color: #8b5cf6;">POST /issueLink</div>
+                    </div>
+                    <div class="system-node node-jira">${svgJira} Jira API Server</div>
+                `;
+
+                const htmlXraySync = `
+                    <div class="system-node node-agent">${svgAgent} Xray Agent</div>
+                    <div class="flow-arrows">
+                        <div class="label-top" style="color: #10b981;">POST /import</div>
+                        <div class="flow-top right"><div class="packet packet-success particle-right">${svgJson}</div></div>
+                        <div class="flow-bottom left"><div class="packet packet-primary particle-left" style="color:#3b82f6;border-color:#3b82f6;">${svgJson}</div></div>
+                        <div class="label-bottom" style="color: #3b82f6;">IDs & Logs</div>
+                    </div>
+                    <div class="system-node node-xray">${svgXray} Xray Test Mgmt</div>
+                `;
+
+                // STRICT: Base metadata and instructions for each agent - IDENTICAL across ALL stories
+                const baseAgents = {
+                    "1": {
+                        title: "Jira Details Fetcher",
+                        tool: "Jira Description Extractor Tool",
+                        color: "linear-gradient(135deg, #3b82f6, #8b5cf6)",
+                        diagramTitle: "🌐 Jira Data Extraction",
+                        diagramHtml: htmlJiraGet,
+                        instructions: [
+                            "As an Automation Engineer, retrieve linked test scenario details from Jira.",
+                            "Call the Jira Description Extractor Tool with the issue_key.",
+                            "Retrieve the output from the tool after its invocation.",
+                            "Format as a JSON object with 'issue_key' and 'description'."
+                        ]
+                    },
+                    "2": {
+                        title: "Scenario Generator",
+                        tool: "Scenario Optimization tool",
+                        color: "linear-gradient(135deg, #8b5cf6, #ec4899)",
+                        diagramTitle: "🔄 Optimization Generation Loop",
+                        diagramHtml: htmlSelfHealingLoop,
+                        instructions: [
+                            "Instead of generating scenarios manually, you MUST use the Scenario Optimization tool.",
+                            "Pass the description as storydescription, summary as storysummary, and extract preconditions/epiccontext.",
+                            "Tool runs an optimization loop between a Scenario Generator Agent and a Scenario Reviewer Agent.",
+                            "Parse the returned deduplicated scenarios (treating [[NL]] as real newlines).",
+                            "Format them into the required JSON array structure for the next agent."
+                        ]
+                    },
+                    "3": {
+                        title: "Jira Task Creator",
+                        tool: "JIRA Task Creator",
+                        color: "linear-gradient(135deg, #0ea5e9, #10b981)",
+                        diagramTitle: "📝 Subtask Creation & Linking",
+                        diagramHtml: htmlJiraPost,
+                        instructions: [
+                            "Automate the creation and linking of JIRA tasks using target Epic Key.",
+                            "Trigger 'QE Demo JIRA Task Creator ASCTeamPoc' providing ALL scenarios without missing any.",
+                            "Monitor the API response for task creation.",
+                            "Trigger linking process to associate task with Epic Key.",
+                            "Save JIRA issue ID (e.g. SCRUM-XXXX) as subtask_id.",
+                            "Handle API errors gracefully (log and retry).",
+                            "Return a brief 1-line description and JSON containing outputUrl."
+                        ]
+                    },
+                    "4": {
+                        title: "Subtask Extractor",
+                        tool: "Jira Description Extractor Tool",
+                        color: "linear-gradient(135deg, #f59e0b, #ef4444)",
+                        diagramTitle: "🌐 Subtask Data Extraction",
+                        diagramHtml: htmlJiraGet,
+                        instructions: [
+                            "Validate all provided inputs and authenticate with Jira securely.",
+                            "Retrieve detailed story information for the specified issue_key (Task ID from prev agent).",
+                            "Analyze response of 'DSG Jira Description Extractor Tool'.",
+                            "Extract all the test scenarios from the description field."
+                        ]
+                    },
+                    "5": {
+                        title: "Test Case Generator",
+                        tool: "TestCases Optimization tool",
+                        color: "linear-gradient(135deg, #ec4899, #f43f5e)",
+                        diagramTitle: "🔄 Optimization TestCase Loop",
+                        diagramHtml: htmlSelfHealingLoop,
+                        instructions: [
+                            "MUST use the TestCases Optimization tool to generate test cases.",
+                            "Pass test cases and requirements to the tool.",
+                            "Tool runs an optimization loop between Test Case Generator and Reviewer Agents.",
+                            "Parse returned testcases, treating [[NL]] as newlines.",
+                            "Format exactly according to standard JSON format (summary, description, test_type, steps).",
+                            "STRICTLY pass the Entire JSON Array without TRUNCATION."
+                        ]
+                    },
+                    "6": {
+                        title: "Xray Test Sync",
+                        tool: "Xray Test Case Creator",
+                        color: "linear-gradient(135deg, #10b981, #059669)",
+                        diagramTitle: "🚀 Xray Bulk Syncing",
+                        diagramHtml: htmlXraySync,
+                        instructions: [
+                            "Collect JSON array from previous agent and map to 'tests_json' (ensure NOT malformed).",
+                            "Validate each input for presence, format, and security.",
+                            "Securely manage credentials (enterprise secrets management).",
+                            "Authenticate with Jira/Xray using TLS 1.3.",
+                            "Invoke Xray Test Case Creator tool with validated JSON.",
+                            "Monitor execution, implement retries/exponential backoff.",
+                            "Sanitize logs (no PII/PHI/PCI) and prepare final output with direct Jira story link."
+                        ]
+                    }
+                };
+
+                // Simple, easy-to-understand stories with Acceptance Criteria & end-to-end downstream traceability
+                const storiesDatabase = {
+                    "default": {
+                        ticketKey: "Default",
+                        agents: {
+                            "1": {
+                                diagramText: "<strong>Working Model:</strong> The agent makes an authenticated HTTP GET request to the Jira API to fetch the user story description and details using the provided issue_key.",
+                                input: `{\n  "issue_key": "{{issue_key_string_true}}"\n}`,
+                                output: `{\n  "issue_key" : "[[issue_key from input]]",\n  "description" : "[[output from the tool]]"\n}`
+                            },
+                            "2": {
+                                hasHealing: true,
+                                diagramText: "<strong>Threshold Logic:</strong> The Orchestrator tool distributes the Jira data to both Gen and QA agents. QA Reviewer evaluates scenarios against epic context. If scenarios lack edge cases or formatting, they are fed back to the Gen agent. Process terminates only when QA threshold is met.",
+                                healingData: [
+                                    {
+                                        attempt: "Attempt #1 (Draft Scenarios)",
+                                        status: "fail",
+                                        score: 54,
+                                        badge: "QA Rejected",
+                                        text: "Missing edge case: empty input and boundary conditions."
+                                    },
+                                    {
+                                        attempt: "Optimization Auto Correction",
+                                        status: "repairing",
+                                        score: null,
+                                        badge: "Auto-Correcting",
+                                        text: "Generator adds missing edge cases and corrects acceptance criteria."
+                                    },
+                                    {
+                                        attempt: "Attempt #2 (Optimized Scenarios)",
+                                        status: "pass",
+                                        score: 94,
+                                        badge: "QA Approved",
+                                        text: "All scenarios verified without duplicates. Approved."
+                                    }
+                                ],
+                                input: `{\n  "issue_key": "...",\n  "description": "Detailed info including acceptance criteria"\n}`,
+                                output: `[\n  {\n    "test_scenario_id": "TS-001",\n    "scenario_type": "positive",\n    "test_scenario_description": "...",\n    "pre_condition": "...",\n    "test_data": "...",\n    "navigable_path": "...",\n    "acceptance_criteria_id": "",\n    "IssueId": ""\n  }\n]`
+                            },
+                            "3": {
+                                diagramText: "<strong>Working Model:</strong> The agent pushes the test scenarios as new subtasks to Jira. It monitors the creation response, and sequentially makes another POST request to link the newly created subtask to the parent Epic.",
+                                input: `{\n  "epic_key": "[[Issue id from prev agent]]",\n  "test_scenarios": []\n}`,
+                                output: `{\n  "outputUrl": "https://jira.example.com/browse/SCRUM-1234",\n  "subtask_id": "SCRUM-1234"\n}`
+                            },
+                            "4": {
+                                diagramText: "<strong>Working Model:</strong> Agent performs an authenticated GET call using the new Subtask ID to securely download and extract the updated scenarios from the Jira subtask description.",
+                                input: `{\n  "issue_key": "{jira-subtask-id}"\n}`,
+                                output: `Output of the tool mandatorily.`
+                            },
+                            "5": {
+                                hasHealing: true,
+                                diagramText: "<strong>Threshold Logic:</strong> Orchestrator passes test cases to Gen & QA agents. QA Reviewer verifies each test case and step assertions. If test cases are ambiguous or JSON is malformed, it triggers the Gen agent to correct them. Halts only when test case quality threshold (≥ 70%) is met.",
+                                healingData: [
+                                    {
+                                        attempt: "Attempt #1 (Draft Test Cases)",
+                                        status: "fail",
+                                        score: 58,
+                                        badge: "QA Flagged",
+                                        text: "Test Case Incomplete: Missing expected_result in step 2."
+                                    },
+                                    {
+                                        attempt: "Optimization TestCase Refinement",
+                                        status: "repairing",
+                                        score: null,
+                                        badge: "Refining",
+                                        text: "Generator conforms strictly with Xray test case step format."
+                                    },
+                                    {
+                                        attempt: "Attempt #2 (Validated Test Cases)",
+                                        status: "pass",
+                                        score: 96,
+                                        badge: "Approved",
+                                        text: "Test case JSON schema validated with complete step definitions."
+                                    }
+                                ],
+                                input: `[\n  { "summary": "JSON Array summary of test cases" }\n]`,
+                                output: `[\n  {\n    "summary": "[XAT-86]...",\n    "description": "**Objective:**...",\n    "test_type": "Functional",\n    "steps": [\n      {\n        "action": "...",\n        "data": "...",\n        "expected_result": "..."\n      }\n    ]\n  }\n]`
+                            },
+                            "6": {
+                                diagramText: "<strong>Working Model:</strong> Validates JSON schema, securely handles TLS authentication, and pushes the final JSON bundle into Xray for test creation. Captures the response execution logs and Jira link for tracking.",
+                                input: `{\n  "project-key": "{jira-project}",\n  "story-key": "{jira-story-id}",\n  "tests-json": "{Converted JSON Array}"\n}`,
+                                output: `Tool Execution Logs: Xray test cases created successfully. [...]\nUser Story Link: https://jira.company.com/browse/PROJ-123\nString of testcases workitem ids: QS-1, QS-2....etc.`
+                            }
+                        }
+                    },
+                    "banking": {
+                        ticketKey: "BANK-101",
+                        agents: {
+                            "1": {
+                                diagramText: "<strong>Working Model:</strong> Reads Banking User Story BANK-101 from Jira to pull requirements and Acceptance Criteria (AC1: Limit <= $1,000, AC2: Over-limit rejection).",
+                                input: `{\n  "issue_key": "BANK-101"\n}`,
+                                output: `{\n  "issue_key": "BANK-101",\n  "description": "As a bank customer, I want to transfer funds to another account up to a $1,000 daily limit.\\n\\nAcceptance Criteria:\\nAC1: Allow transfer when account balance is sufficient and amount is within $1,000 daily limit.\\nAC2: Block transfer and display error if amount exceeds $1,000 daily limit or available balance."\n}`
+                            },
+                            "2": {
+                                hasHealing: true,
+                                diagramText: "<strong>Threshold Logic:</strong> QA Reviewer evaluates generated scenarios against Acceptance Criteria AC1 & AC2. Detects missing coverage for AC2 (daily limit rejection) and prompts Generator to optimize and include it.",
+                                healingData: [
+                                    {
+                                        attempt: "Attempt #1 (Initial Check)",
+                                        status: "fail",
+                                        score: 52,
+                                        badge: "QA Flagged",
+                                        text: "Acceptance Criteria Incomplete: Missing negative scenario for AC2 (transfer exceeding $1,000 limit)."
+                                    },
+                                    {
+                                        attempt: "Optimization Auto Correction",
+                                        status: "repairing",
+                                        score: null,
+                                        badge: "Auto-Correcting",
+                                        text: "Generator auto-analyzes AC2 and synthesizes negative test scenario TS-002 for limit check."
+                                    },
+                                    {
+                                        attempt: "Attempt #2 (Approved)",
+                                        status: "pass",
+                                        score: 95,
+                                        badge: "QA Approved",
+                                        text: "100% Acceptance Criteria coverage (AC1 & AC2) verified without duplicates. Approved."
+                                    }
+                                ],
+                                input: `{\n  "issue_key": "BANK-101",\n  "description": "As a bank customer, I want to transfer funds to another account up to a $1,000 daily limit.\\n\\nAcceptance Criteria:\\nAC1: Allow transfer when account balance is sufficient and amount is within $1,000 daily limit.\\nAC2: Block transfer and display error if amount exceeds $1,000 daily limit or available balance."\n}`,
+                                output: `[\n  {\n    "test_scenario_id": "TS-001",\n    "scenario_type": "positive",\n    "test_scenario_description": "Verify successful fund transfer within daily limit (AC1)",\n    "pre_condition": "User has sufficient account balance ($500)",\n    "test_data": "transfer_amount: $200",\n    "navigable_path": "/transfer -> enter details -> Confirm -> Success",\n    "acceptance_criteria_id": "AC1",\n    "IssueId": "BANK-101"\n  },\n  {\n    "test_scenario_id": "TS-002",\n    "scenario_type": "negative",\n    "test_scenario_description": "Verify transfer is blocked when exceeding $1,000 limit (AC2)",\n    "pre_condition": "Daily limit consumed is $900 ($100 remaining)",\n    "test_data": "transfer_amount: $200",\n    "navigable_path": "/transfer -> enter details -> Confirm -> Limit Exceeded Error",\n    "acceptance_criteria_id": "AC2",\n    "IssueId": "BANK-101"\n  }\n]`
+                            },
+                            "3": {
+                                diagramText: "<strong>Working Model:</strong> Creates Jira subtask BANK-101-1 containing AC1 and AC2 test scenarios and links it under parent Story BANK-101.",
+                                input: `{\n  "epic_key": "BANK-101",\n  "test_scenarios": [\n    {\n      "test_scenario_id": "TS-001",\n      "acceptance_criteria_id": "AC1"\n    },\n    {\n      "test_scenario_id": "TS-002",\n      "acceptance_criteria_id": "AC2"\n    }\n  ]\n}`,
+                                output: `{\n  "outputUrl": "https://jira.company.com/browse/BANK-101-1",\n  "subtask_id": "BANK-101-1"\n}`
+                            },
+                            "4": {
+                                diagramText: "<strong>Working Model:</strong> Fetches verified subtask payload from BANK-101-1 to start generating test steps for AC1 and AC2.",
+                                input: `{\n  "issue_key": "BANK-101-1"\n}`,
+                                output: `Tool Execution Logs: Extracted 2 verified test scenarios mapping to Acceptance Criteria AC1 & AC2 from subtask BANK-101-1.`
+                            },
+                            "5": {
+                                hasHealing: true,
+                                diagramText: "<strong>Threshold Logic:</strong> Verifies test cases cover all assertions and steps required by Acceptance Criteria AC1 & AC2 before Xray sync.",
+                                healingData: [
+                                    {
+                                        attempt: "Attempt #1 (Draft Test Cases)",
+                                        status: "fail",
+                                        score: 55,
+                                        badge: "QA Flagged",
+                                        text: "AC2 Assertion Missing: Test case step 1 lacked specific error message verification ('Daily transfer limit exceeded')."
+                                    },
+                                    {
+                                        attempt: "Optimization TestCase Refinement",
+                                        status: "repairing",
+                                        score: null,
+                                        badge: "Refining",
+                                        text: "Added expected result: 'Error shown: Daily transfer limit of $1,000 exceeded' adhering to AC2."
+                                    },
+                                    {
+                                        attempt: "Attempt #2 (Validated Test Cases)",
+                                        status: "pass",
+                                        score: 98,
+                                        badge: "Approved",
+                                        text: "All test cases and steps validated against AC1 & AC2 rules with complete assertions. Approved."
+                                    }
+                                ],
+                                input: `[\n  {\n    "summary": "TC-001 Verify transfer within daily limit (AC1)"\n  },\n  {\n    "summary": "TC-002 Verify transfer blocked over limit (AC2)"\n  }\n]`,
+                                output: `[\n  {\n    "summary": "[BANK-101] [AC1] Transfer $200 with Sufficient Balance",\n    "description": "**Objective:** Verify AC1: Transfer completes successfully within limit",\n    "test_type": "Functional",\n    "steps": [\n      {\n        "action": "Enter recipient account and $200, click Transfer",\n        "data": "amount: 200",\n        "expected_result": "Transfer successful confirmation shown and balance updated"\n      }\n    ]\n  },\n  {\n    "summary": "[BANK-101] [AC2] Block Transfer Exceeding Daily Limit",\n    "description": "**Objective:** Verify AC2: Error displayed when daily limit is exceeded",\n    "test_type": "Functional",\n    "steps": [\n      {\n        "action": "Enter $200 when daily remaining limit is $100",\n        "data": "amount: 200",\n        "expected_result": "Error shown: 'Daily transfer limit of $1,000 exceeded'"\n      }\n    ]\n  }\n]`
+                            },
+                            "6": {
+                                diagramText: "<strong>Working Model:</strong> Automatically syncs the 2 banking test cases into Jira Xray, mapped to Acceptance Criteria AC1 & AC2.",
+                                input: `{\n  "project-key": "BANK",\n  "story-key": "BANK-101",\n  "tests-json": "[2 TestCases mapped to AC1 & AC2]"\n}`,
+                                output: `Tool Execution Logs: Xray test cases created and mapped to Acceptance Criteria (AC1, AC2) successfully. [XRAY-BANK-01, XRAY-BANK-02]\nUser Story Link: https://jira.company.com/browse/BANK-101\nString of testcases workitem ids: XRAY-BANK-01, XRAY-BANK-02`
+                            }
+                        }
+                    },
+                    "healthcare": {
+                        ticketKey: "CARE-202",
+                        agents: {
+                            "1": {
+                                diagramText: "<strong>Working Model:</strong> Reads Healthcare User Story CARE-202 from Jira to extract appointment scheduling requirements and Acceptance Criteria (AC1: Confirm open slot, AC2: Block reserved slot).",
+                                input: `{\n  "issue_key": "CARE-202"\n}`,
+                                output: `{\n  "issue_key": "CARE-202",\n  "description": "As a patient, I want to book a doctor appointment with available time slot selection.\\n\\nAcceptance Criteria:\\nAC1: Confirm appointment booking and generate booking ID when an available time slot is selected.\\nAC2: Prevent booking and show 'Slot Unavailable' error if selected time slot is already reserved."\n}`
+                            },
+                            "2": {
+                                hasHealing: true,
+                                diagramText: "<strong>Threshold Logic:</strong> QA Reviewer checks scenarios against Acceptance Criteria AC1 & AC2. Detects missing conflict scenario for AC2 and triggers automatic optimization.",
+                                healingData: [
+                                    {
+                                        attempt: "Attempt #1 (Initial Check)",
+                                        status: "fail",
+                                        score: 50,
+                                        badge: "QA Flagged",
+                                        text: "Acceptance Criteria Incomplete: Missing negative scenario for AC2 (booking an already reserved slot)."
+                                    },
+                                    {
+                                        attempt: "Optimization Auto Correction",
+                                        status: "repairing",
+                                        score: null,
+                                        badge: "Auto-Correcting",
+                                        text: "Generator analyzes AC2 rule and synthesizes conflict scenario TS-002 for double-booking prevention."
+                                    },
+                                    {
+                                        attempt: "Attempt #2 (Approved)",
+                                        status: "pass",
+                                        score: 96,
+                                        badge: "QA Approved",
+                                        text: "100% Acceptance Criteria coverage (AC1 & AC2) verified and approved."
+                                    }
+                                ],
+                                input: `{\n  "issue_key": "CARE-202",\n  "description": "As a patient, I want to book a doctor appointment with available time slot selection.\\n\\nAcceptance Criteria:\\nAC1: Confirm appointment booking and generate booking ID when an available time slot is selected.\\nAC2: Prevent booking and show 'Slot Unavailable' error if selected time slot is already reserved."\n}`,
+                                output: `[\n  {\n    "test_scenario_id": "TS-001",\n    "scenario_type": "positive",\n    "test_scenario_description": "Confirm appointment booking for available slot (AC1)",\n    "pre_condition": "Doctor has open slot at 10:00 AM",\n    "test_data": "doctor: 'Dr. Smith', date: 'Tomorrow', time: '10:00 AM'",\n    "navigable_path": "/book -> select slot -> Confirm",\n    "acceptance_criteria_id": "AC1",\n    "IssueId": "CARE-202"\n  },\n  {\n    "test_scenario_id": "TS-002",\n    "scenario_type": "negative",\n    "test_scenario_description": "Prevent booking an already reserved time slot (AC2)",\n    "pre_condition": "Slot at 11:00 AM is booked by another patient",\n    "test_data": "doctor: 'Dr. Smith', time: '11:00 AM'",\n    "navigable_path": "/book -> select slot -> Slot Unavailable",\n    "acceptance_criteria_id": "AC2",\n    "IssueId": "CARE-202"\n  }\n]`
+                            },
+                            "3": {
+                                diagramText: "<strong>Working Model:</strong> Creates Jira subtask CARE-202-1 containing AC1 and AC2 test scenarios and links it under parent Story CARE-202.",
+                                input: `{\n  "epic_key": "CARE-202",\n  "test_scenarios": [\n    {\n      "test_scenario_id": "TS-001",\n      "acceptance_criteria_id": "AC1"\n    },\n    {\n      "test_scenario_id": "TS-002",\n      "acceptance_criteria_id": "AC2"\n    }\n  ]\n}`,
+                                output: `{\n  "outputUrl": "https://jira.company.com/browse/CARE-202-1",\n  "subtask_id": "CARE-202-1"\n}`
+                            },
+                            "4": {
+                                diagramText: "<strong>Working Model:</strong> Fetches verified subtask payload from CARE-202-1 to start generating test steps for AC1 and AC2.",
+                                input: `{\n  "issue_key": "CARE-202-1"\n}`,
+                                output: `Tool Execution Logs: Extracted 2 verified test scenarios mapping to Acceptance Criteria AC1 & AC2 from subtask CARE-202-1.`
+                            },
+                            "5": {
+                                hasHealing: true,
+                                diagramText: "<strong>Threshold Logic:</strong> Validates test cases for appointment confirmation and disabled slot UI actions against Acceptance Criteria AC1 & AC2.",
+                                healingData: [
+                                    {
+                                        attempt: "Attempt #1 (Draft Test Cases)",
+                                        status: "fail",
+                                        score: 56,
+                                        badge: "QA Flagged",
+                                        text: "AC2 Assertion Missing: Test case step 2 lacked assertion for disabled state on reserved slot."
+                                    },
+                                    {
+                                        attempt: "Optimization TestCase Refinement",
+                                        status: "repairing",
+                                        score: null,
+                                        badge: "Refining",
+                                        text: "Added assertion that booked slot cannot be selected and shows 'Slot Unavailable' adhering to AC2."
+                                    },
+                                    {
+                                        attempt: "Attempt #2 (Validated Test Cases)",
+                                        status: "pass",
+                                        score: 97,
+                                        badge: "Approved",
+                                        text: "All test case steps and assertions verified against AC1 & AC2. 100% compliant."
+                                    }
+                                ],
+                                input: `[\n  {\n    "summary": "TC-001 Confirm booking for available slot (AC1)"\n  },\n  {\n    "summary": "TC-002 Prevent booking reserved slot (AC2)"\n  }\n]`,
+                                output: `[\n  {\n    "summary": "[CARE-202] [AC1] Book 10:00 AM Appointment Successfully",\n    "description": "**Objective:** Verify AC1: Patient receives booking confirmation",\n    "test_type": "Functional",\n    "steps": [\n      {\n        "action": "Select Dr. Smith, pick 10:00 AM slot, click Confirm",\n        "data": "doctor: 'Dr. Smith', slot: '10:00 AM'",\n        "expected_result": "Booking confirmation shown with appointment ID"\n      }\n    ]\n  },\n  {\n    "summary": "[CARE-202] [AC2] Show Error for Already Booked Slot",\n    "description": "**Objective:** Verify AC2: Unavailable slot cannot be selected",\n    "test_type": "Functional",\n    "steps": [\n      {\n        "action": "Click on greyed-out 11:00 AM booked slot",\n        "data": "slot: '11:00 AM (Booked)'",\n        "expected_result": "Slot shows as disabled with 'Slot Unavailable' and cannot be confirmed"\n      }\n    ]\n  }\n]`
+                            },
+                            "6": {
+                                diagramText: "<strong>Working Model:</strong> Automatically syncs the 2 healthcare test cases into Jira Xray, mapped to Acceptance Criteria AC1 & AC2.",
+                                input: `{\n  "project-key": "CARE",\n  "story-key": "CARE-202",\n  "tests-json": "[2 TestCases mapped to AC1 & AC2]"\n}`,
+                                output: `Tool Execution Logs: Xray test cases created and mapped to Acceptance Criteria (AC1, AC2) successfully. [XRAY-CARE-01, XRAY-CARE-02]\nUser Story Link: https://jira.company.com/browse/CARE-202\nString of testcases workitem ids: XRAY-CARE-01, XRAY-CARE-02`
+                            }
+                        }
+                    }
+                };
+
+                // Current selected story state - DEFAULT to original v1
+                let currentStory = "default";
+                let currentActiveAgent = "1";
+                let isSimulating = false;
+
+                const nodes = document.querySelectorAll('.agent-node');
+                const emptyState = document.getElementById('emptyState');
+                const detailsContent = document.getElementById('detailsContent');
+                const btnSimulate = document.getElementById('btnSimulate');
+                const storySelect = document.getElementById('storySelect');
+                const ticketPill = document.getElementById('ticketPill');
+                const btnPrevAgent = document.getElementById('btnPrevAgent');
+                const btnNextAgent = document.getElementById('btnNextAgent');
+                const agentNavIndicator = document.getElementById('agentNavIndicator');
+
+                // Detail elements
+                const pIcon = document.getElementById('pIcon');
+                const pTitle = document.getElementById('pTitle');
+                const pTool = document.getElementById('pTool');
+                const pHealingAction = document.getElementById('pHealingAction');
+                const btnTriggerHeal = document.getElementById('btnTriggerHeal');
+                const pSelfHealingCard = document.getElementById('pSelfHealingCard');
+                const healingStepper = document.getElementById('healingStepper');
+                const healingOutcomeBadge = document.getElementById('healingOutcomeBadge');
+                const healingConfidenceScore = document.getElementById('healingConfidenceScore');
+                const healingGaugeFill = document.getElementById('healingGaugeFill');
+                const pInputRaw = document.getElementById('pInputRaw');
+                const pInputFormatted = document.getElementById('pInputFormatted');
+                const pInstructionsList = document.getElementById('pInstructionsList');
+                const pOutputRaw = document.getElementById('pOutputRaw');
+                const pOutputFormatted = document.getElementById('pOutputFormatted');
+                const pDiagramWrapper = document.getElementById('pDiagramWrapper');
+                const pDiagramTitle = document.getElementById('pDiagramTitle');
+                const pDiagramContent = document.getElementById('pDiagramContent');
+                const pDiagramExplanation = document.getElementById('pDiagramExplanation');
+
+                // Syntax highlighter
+                function syntaxHighlight(json) {
+                    if (typeof json != 'string') json = JSON.stringify(json, undefined, 2);
+                    json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                        let cls = 'json-number';
+                        if (/^"/.test(match)) {
+                            if (/:$/.test(match)) { cls = 'json-key'; }
+                            else { cls = 'json-string'; }
+                        } else if (/true|false/.test(match)) {
+                            cls = 'json-boolean';
+                        } else if (/null/.test(match)) {
+                            cls = 'json-boolean';
+                        }
+                        return '<span class="' + cls + '">' + match + '</span>';
+                    });
+                }
+
+                // Story Selector Change Handler - ONLY changes inputs, outputs, and optimization explanation
+                storySelect.addEventListener('change', (e) => {
+                    currentStory = e.target.value;
+                    const story = storiesDatabase[currentStory];
+                    ticketPill.textContent = story.ticketKey;
+
+                    // If an agent is already active, refresh its details immediately
+                    if (currentActiveAgent) {
+                        populateDetails(currentActiveAgent);
+                    }
+                });
+
+                // Update arrow button disabled states (bounded between 1 and 6)
+                function updateNavButtonsState() {
+                    const idNum = parseInt(currentActiveAgent || "1", 10);
+                    if (btnPrevAgent) btnPrevAgent.disabled = isSimulating || idNum <= 1;
+                    if (btnNextAgent) btnNextAgent.disabled = isSimulating || idNum >= 6;
+                }
+
+                // Select Agent Helper (Works before or after simulation, or via arrows/clicks)
+                function selectAgent(agentId, smoothScroll = true) {
+                    let idNum = parseInt(agentId, 10);
+                    if (isNaN(idNum) || idNum < 1) idNum = 1;
+                    if (idNum > 6) idNum = 6;
+                    const strId = String(idNum);
+                    currentActiveAgent = strId;
+
+                    if (agentNavIndicator) {
+                        agentNavIndicator.textContent = "0" + strId;
+                    }
+
+                    nodes.forEach(n => {
+                        if (n.getAttribute('data-agent') === strId) {
+                            n.classList.add('active');
+                            if (smoothScroll && pipelineWrapper) {
+                                const nodeLeft = n.offsetLeft;
+                                const wrapperScroll = pipelineWrapper.scrollLeft;
+                                const wrapperWidth = pipelineWrapper.clientWidth;
+                                if (nodeLeft < wrapperScroll + 50 || nodeLeft > wrapperScroll + wrapperWidth - 280) {
+                                    pipelineWrapper.scrollTo({ left: Math.max(0, nodeLeft - 80), behavior: 'smooth' });
+                                }
+                            }
+                        } else {
+                            n.classList.remove('active');
+                        }
+                    });
+
+                    populateDetails(strId);
+                    updateNavButtonsState();
+                }
+
+                // Arrow buttons to switch between agents (strictly bounded between 1 and 6)
+                btnPrevAgent.addEventListener('click', () => {
+                    if (isSimulating) return;
+                    let current = parseInt(currentActiveAgent || "1", 10);
+                    if (current <= 1) return; // Cannot go left after 1
+                    selectAgent(current - 1, true);
+                });
+
+                btnNextAgent.addEventListener('click', () => {
+                    if (isSimulating) return;
+                    let current = parseInt(currentActiveAgent || "1", 10);
+                    if (current >= 6) return; // Cannot go right after 6
+                    selectAgent(current + 1, true);
+                });
+
+                // Agent Node Hover / Click
+                nodes.forEach(node => {
+                    const activate = () => {
+                        if (isSimulating) return;
+                        const agentId = node.getAttribute('data-agent');
+                        selectAgent(agentId, false);
+                    };
+                    node.addEventListener('mouseenter', activate);
+                    node.addEventListener('click', activate);
+                });
+
+                function populateDetails(agentId) {
+                    const base = baseAgents[agentId];
+                    const story = storiesDatabase[currentStory];
+                    const storyData = story.agents[agentId];
+                    if (!base || !storyData) return;
+
+                    emptyState.style.display = 'none';
+                    detailsContent.classList.remove('visible');
+                    void detailsContent.offsetWidth; // trigger reflow
+
+                    pIcon.textContent = "0" + agentId;
+                    pIcon.style.background = base.color;
+                    pTitle.textContent = base.title;
+                    pTool.textContent = base.tool;
+                    if (agentNavIndicator) {
+                        agentNavIndicator.textContent = "0" + agentId;
+                    }
+                    updateNavButtonsState();
+
+                    // STRICT: Instructions are taken directly from baseAgents and NEVER change between stories
+                    pInstructionsList.innerHTML = '';
+                    base.instructions.forEach(inst => {
+                        const li = document.createElement('li');
+                        li.textContent = inst;
+                        pInstructionsList.appendChild(li);
+                    });
+
+                    // Populate Optimization Card
+                    if (storyData.hasHealing && storyData.healingData) {
+                        pSelfHealingCard.style.display = 'flex';
+                        pHealingAction.style.display = 'block';
+                        renderHealingSteps(storyData.healingData);
+                    } else {
+                        pSelfHealingCard.style.display = 'none';
+                        pHealingAction.style.display = 'none';
+                    }
+
+                    // Raw & Formatted JSON Inputs & Outputs
+                    pInputRaw.innerText = storyData.input;
+                    pOutputRaw.innerText = storyData.output;
+                    pInputFormatted.innerHTML = syntaxHighlight(storyData.input);
+
+                    // Check if output is JSON or text logs
+                    if (storyData.output.trim().startsWith('{') || storyData.output.trim().startsWith('[')) {
+                        pOutputFormatted.innerHTML = syntaxHighlight(storyData.output);
+                    } else {
+                        pOutputFormatted.innerText = storyData.output;
+                    }
+
+                    // Diagram Title & Working Model Explanation (Optimization Explanation changes per story)
+                    pDiagramWrapper.style.display = 'flex';
+                    pDiagramTitle.innerHTML = base.diagramTitle;
+                    pDiagramContent.innerHTML = base.diagramHtml;
+                    pDiagramExplanation.innerHTML = storyData.diagramText;
+
+                    detailsContent.classList.add('visible');
+                }
+
+                function renderHealingSteps(steps) {
+                    healingStepper.innerHTML = '';
+
+                    const finalStep = steps[steps.length - 1];
+                    const finalScore = (finalStep && finalStep.score != null) ? finalStep.score : 94;
+                    const isPassed = finalScore >= 70;
+
+                    healingOutcomeBadge.className = `step-badge ${isPassed ? 'pass' : 'fail'}`;
+                    healingOutcomeBadge.textContent = isPassed ? `Approved (${finalScore}% ≥ 70%)` : `Rejected (${finalScore}% < 70%)`;
+
+                    if (healingConfidenceScore) {
+                        healingConfidenceScore.textContent = `${finalScore}%`;
+                        healingConfidenceScore.className = `telemetry-score-badge ${isPassed ? 'pass' : 'fail'}`;
+                    }
+                    if (healingGaugeFill) {
+                        healingGaugeFill.style.width = `${finalScore}%`;
+                        healingGaugeFill.className = `gauge-fill ${isPassed ? 'pass' : 'fail'}`;
+                    }
+
+                    steps.forEach(step => {
+                        const stepEl = document.createElement('div');
+                        stepEl.className = `healing-step ${step.status}`;
+
+                        const scorePill = step.score != null
+                            ? `<span class="step-score-pill ${step.status}">Score: ${step.score}% (${step.score >= 70 ? '≥ 70%' : '< 70%'})</span>`
+                            : (step.status === 'repairing' ? `<span class="step-score-pill repair">Auto-Repairing</span>` : '');
+
+                        stepEl.innerHTML = `
+                            <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start; flex-shrink: 0;">
+                                <span class="step-badge ${step.status}">${step.badge}</span>
+                                ${scorePill}
+                            </div>
+                            <div style="flex: 1;">
+                                <strong style="color: #f8fafc; font-size: 0.85rem;">${step.attempt}:</strong>
+                                <div style="color: #94a3b8; font-size: 0.8rem; margin-top: 2px;">${step.text}</div>
+                            </div>
+                        `;
+                        healingStepper.appendChild(stepEl);
+                    });
+                }
+
+                // Interactive Animated Execution of Optimization Loop
+                async function runLiveSelfHealingAnimation(agentId) {
+                    const story = storiesDatabase[currentStory];
+                    const data = story.agents[agentId];
+                    if (!data || !data.healingData) return;
+
+                    const activeNode = document.querySelector(`.agent-node[data-agent="${agentId}"]`);
+                    if (activeNode) activeNode.classList.add('healing-active');
+
+                    pSelfHealingCard.style.display = 'flex';
+                    healingStepper.innerHTML = '';
+                    healingOutcomeBadge.className = 'step-badge repair';
+                    healingOutcomeBadge.textContent = 'Evaluating (Threshold: 70%)...';
+
+                    if (healingConfidenceScore) {
+                        healingConfidenceScore.textContent = '--%';
+                        healingConfidenceScore.className = 'telemetry-score-badge repair';
+                    }
+                    if (healingGaugeFill) {
+                        healingGaugeFill.style.width = '0%';
+                        healingGaugeFill.className = 'gauge-fill repair';
+                    }
+
+                    for (let i = 0; i < data.healingData.length; i++) {
+                        const step = data.healingData[i];
+                        const stepEl = document.createElement('div');
+                        stepEl.className = `healing-step ${step.status}`;
+                        stepEl.style.opacity = '0';
+                        stepEl.style.transform = 'translateX(-10px)';
+
+                        const scorePill = step.score != null
+                            ? `<span class="step-score-pill ${step.status}">Score: ${step.score}% (${step.score >= 70 ? '≥ 70%' : '< 70%'})</span>`
+                            : (step.status === 'repairing' ? `<span class="step-score-pill repair">Auto-Repairing</span>` : '');
+
+                        stepEl.innerHTML = `
+                            <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start; flex-shrink: 0;">
+                                <span class="step-badge ${step.status}">${step.badge}</span>
+                                ${scorePill}
+                            </div>
+                            <div style="flex: 1;">
+                                <strong style="color: #f8fafc; font-size: 0.85rem;">${step.attempt}:</strong>
+                                <div style="color: #94a3b8; font-size: 0.8rem; margin-top: 2px;">${step.text}</div>
+                            </div>
+                        `;
+                        healingStepper.appendChild(stepEl);
+
+                        // Animate step entrance
+                        await sleep(150);
+                        stepEl.style.transition = 'all 0.4s ease';
+                        stepEl.style.opacity = '1';
+                        stepEl.style.transform = 'translateX(0)';
+
+                        if (step.status === 'fail') {
+                            const score = step.score != null ? step.score : 52;
+                            healingOutcomeBadge.className = 'step-badge fail';
+                            healingOutcomeBadge.textContent = `QA Rejected (${score}% < 70%)`;
+                            if (healingConfidenceScore) {
+                                healingConfidenceScore.textContent = `${score}%`;
+                                healingConfidenceScore.className = 'telemetry-score-badge fail';
+                            }
+                            if (healingGaugeFill) {
+                                healingGaugeFill.style.width = `${score}%`;
+                                healingGaugeFill.className = 'gauge-fill fail';
+                            }
+                        } else if (step.status === 'repairing') {
+                            healingOutcomeBadge.className = 'step-badge repair';
+                            healingOutcomeBadge.textContent = 'Auto-Repairing...';
+                            if (healingConfidenceScore) {
+                                healingConfidenceScore.textContent = 'Recalibrating...';
+                                healingConfidenceScore.className = 'telemetry-score-badge repair';
+                            }
+                            if (healingGaugeFill) {
+                                healingGaugeFill.style.width = '70%';
+                                healingGaugeFill.className = 'gauge-fill repair';
+                            }
+                        } else if (step.status === 'pass') {
+                            const score = step.score != null ? step.score : 95;
+                            healingOutcomeBadge.className = 'step-badge pass';
+                            healingOutcomeBadge.textContent = `QA Approved (${score}% ≥ 70%)`;
+                            if (healingConfidenceScore) {
+                                healingConfidenceScore.textContent = `${score}%`;
+                                healingConfidenceScore.className = 'telemetry-score-badge pass';
+                            }
+                            if (healingGaugeFill) {
+                                healingGaugeFill.style.width = `${score}%`;
+                                healingGaugeFill.className = 'gauge-fill pass';
+                            }
+                        }
+
+                        await sleep(1200);
+                    }
+
+                    if (activeNode) activeNode.classList.remove('healing-active');
+                }
+
+                // Button for manual replay
+                let isHealingAnimating = false;
+                btnTriggerHeal.addEventListener('click', async () => {
+                    if (isSimulating || isHealingAnimating) return;
+                    isHealingAnimating = true;
+                    btnTriggerHeal.disabled = true;
+                    btnTriggerHeal.style.opacity = '0.6';
+                    await runLiveSelfHealingAnimation(currentActiveAgent);
+                    btnTriggerHeal.disabled = false;
+                    btnTriggerHeal.style.opacity = '';
+                    isHealingAnimating = false;
+                });
+
+                // Copy Code Helper
+                window.copyCode = function (elementId, btnElement) {
+                    const text = document.getElementById(elementId).innerText;
+                    navigator.clipboard.writeText(text).then(() => {
+                        const originalHtml = btnElement.innerHTML;
+                        btnElement.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Copied!`;
+                        btnElement.classList.add('copied');
+                        setTimeout(() => {
+                            btnElement.innerHTML = originalHtml;
+                            btnElement.classList.remove('copied');
+                        }, 2000);
+                    });
+                };
+
+                // Draggable Canvas
+                const pipelineWrapper = document.getElementById('pipelineWrapper');
+                let isDown = false;
+                let startX, scrollLeft;
+
+                pipelineWrapper.addEventListener('mousedown', (e) => {
+                    isDown = true;
+                    startX = e.pageX - pipelineWrapper.offsetLeft;
+                    scrollLeft = pipelineWrapper.scrollLeft;
+                });
+                pipelineWrapper.addEventListener('mouseleave', () => { isDown = false; });
+                pipelineWrapper.addEventListener('mouseup', () => { isDown = false; });
+                pipelineWrapper.addEventListener('mousemove', (e) => {
+                    if (!isDown) return;
+                    e.preventDefault();
+                    const x = e.pageX - pipelineWrapper.offsetLeft;
+                    const walk = (x - startX) * 2;
+                    pipelineWrapper.scrollLeft = scrollLeft - walk;
+                });
+
+                // Pipeline Simulation Runner with Automated Live Optimization execution
+                const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+                btnSimulate.addEventListener('click', async () => {
+                    if (isSimulating) return;
+                    isSimulating = true;
+                    btnSimulate.disabled = true;
+                    if (btnPrevAgent) btnPrevAgent.disabled = true;
+                    if (btnNextAgent) btnNextAgent.disabled = true;
+                    btnSimulate.innerHTML = `<div class="sim-spinner"></div> Running...`;
+
+                    // Reset all nodes and connectors
+                    nodes.forEach(n => {
+                        n.classList.remove('active', 'simulating', 'healing-active');
+                        const status = n.querySelector('.pipeline-status');
+                        status.innerHTML = `<div class="sim-spinner"></div> Processing`;
+                    });
+                    document.querySelectorAll('.connector').forEach(c => {
+                        c.classList.remove('flowing', 'filled');
+                        const flow = c.querySelector('.connector-flow');
+                        if (flow) {
+                            flow.style.transition = 'none';
+                            flow.style.width = '0';
+                            void flow.offsetWidth;
+                            flow.style.transition = '';
+                        }
+                    });
+
+                    pipelineWrapper.scrollTo({ left: 0, behavior: 'smooth' });
+
+                    for (let i = 0; i < nodes.length; i++) {
+                        const node = nodes[i];
+                        const agentId = node.getAttribute('data-agent');
+                        currentActiveAgent = agentId;
+
+                        nodes.forEach(n => n.classList.remove('active'));
+                        node.classList.add('active', 'simulating');
+
+                        // Scroll into view if needed
+                        if (node.offsetLeft > pipelineWrapper.scrollLeft + pipelineWrapper.clientWidth - 300) {
+                            pipelineWrapper.scrollTo({ left: node.offsetLeft - 100, behavior: 'smooth' });
+                        }
+
+                        populateDetails(agentId);
+
+                        // If Agent 2 or 5, execute the Optimization Explanation in sync with pipeline simulation
+                        if (agentId === "2" || agentId === "5") {
+                            node.classList.add('healing-active');
+                            const status = node.querySelector('.pipeline-status');
+                            status.innerHTML = `<div class="sim-spinner"></div> Optimization Loop`;
+
+                            // Execute the live step-by-step optimization explanation animation
+                            await runLiveSelfHealingAnimation(agentId);
+                            node.classList.remove('healing-active');
+                        } else {
+                            await sleep(2000);
+                        }
+
+                        // Complete Node
+                        node.classList.remove('simulating');
+                        node.querySelector('.pipeline-status').innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Completed`;
+                        node.classList.add('simulating');
+                        node.style.borderColor = "var(--card-border)";
+                        node.style.boxShadow = "none";
+
+                        // Animate connector flow to next node
+                        const connector = node.nextElementSibling;
+                        if (connector && connector.classList.contains('connector')) {
+                            connector.classList.add('flowing');
+                            await sleep(1000);
+                            connector.classList.remove('flowing');
+                            connector.classList.add('filled');
+                        } else {
+                            await sleep(400);
+                        }
+                    }
+
+                    isSimulating = false;
+                    btnSimulate.disabled = false;
+                    updateNavButtonsState();
+                    btnSimulate.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Run Again`;
+
+                    setTimeout(() => {
+                        nodes.forEach(n => n.classList.remove('simulating'));
+                    }, 3000);
+                });
+
+                // Fullscreen Toggle
+                const btnFullscreen = document.getElementById('btnFullscreen');
+                const appWindow = document.querySelector('.app-window');
+
+                btnFullscreen.addEventListener('click', () => {
+                    if (!document.fullscreenElement) {
+                        if (appWindow.requestFullscreen) appWindow.requestFullscreen();
+                    } else {
+                        if (document.exitFullscreen) document.exitFullscreen();
+                    }
+                });
+
+                document.addEventListener('fullscreenchange', () => {
+                    if (document.fullscreenElement) {
+                        btnFullscreen.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path></svg> Exit`;
+                    } else {
+                        btnFullscreen.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg> Fullscreen`;
+                    }
+                });
+
+                // Light / Dark Theme Toggle
+                const themeToggle = document.getElementById('themeToggle');
+                const sunIcon = document.getElementById('sunIcon');
+                const moonIcon = document.getElementById('moonIcon');
+
+                themeToggle.addEventListener('click', () => {
+                    document.body.classList.toggle('light-mode');
+                    if (document.body.classList.contains('light-mode')) {
+                        sunIcon.style.display = 'none';
+                        moonIcon.style.display = 'block';
+                    } else {
+                        sunIcon.style.display = 'block';
+                        moonIcon.style.display = 'none';
+                    }
+                });
+
+                // Initialize with Agent 1 active and default story
+                document.addEventListener("DOMContentLoaded", () => {
+                    nodes.forEach((node, index) => {
+                        node.style.opacity = '0';
+                        node.style.transform = 'translateY(20px)';
+                        setTimeout(() => {
+                            node.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+                            node.style.opacity = '1';
+                            node.style.transform = 'translateY(0)';
+                        }, index * 200);
+                    });
+
+                    setTimeout(() => {
+                        nodes[0].classList.add('active');
+                        populateDetails("1");
+                        updateNavButtonsState();
+                    }, 500);
+                });
+            </script>
+        </div>
+    </section>
+
+</body>
+
+</html>
